@@ -27,15 +27,15 @@ impl Stack {
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        self.entries.last_mut().unwrap().spot(location);
+        self.entries.last_mut().unwrap().set_location(location);
         self
     }
 
-    pub(crate) fn store<D>(&mut self, doom: D)
+    pub(crate) fn store_original<D>(&mut self, doom: D)
     where
         D: Doom,
     {
-        self.entries.last_mut().unwrap().store(doom);
+        self.entries.last_mut().unwrap().set_original(doom);
     }
 }
 

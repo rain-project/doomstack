@@ -42,11 +42,11 @@ impl Entry {
         self.original.as_ref().map(AsRef::as_ref)
     }
 
-    pub(crate) fn spot(&mut self, location: (&'static str, u32)) {
+    pub(crate) fn set_location(&mut self, location: (&'static str, u32)) {
         self.location = Some(location);
     }
 
-    pub(crate) fn store<D>(&mut self, doom: D)
+    pub(crate) fn set_original<D>(&mut self, doom: D)
     where
         D: Doom,
     {

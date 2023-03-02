@@ -2,7 +2,7 @@ use crate::{Description, Stack, Top};
 use std::error::Error;
 
 pub trait Doom: Error + 'static + Sized + Send + Sync {
-    fn store() -> bool;
+    fn keep_original() -> bool;
 
     fn tag(&self) -> &'static str;
     fn description(&self) -> Description;

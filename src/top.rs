@@ -56,8 +56,8 @@ where
     D: Doom,
 {
     fn from(mut top: Top<D>) -> Self {
-        if D::store() {
-            top.stack.store(top.top);
+        if D::keep_original() {
+            top.stack.store_original(top.top);
         }
 
         top.stack
