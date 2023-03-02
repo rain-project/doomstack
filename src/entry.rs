@@ -1,7 +1,6 @@
 use crate::{Description, Doom};
 use std::{
-    any::TypeId,
-    error::Error,
+    any::Any,
     fmt::{self, Debug, Display, Formatter},
     sync::Arc,
 };
@@ -11,10 +10,7 @@ pub struct Entry {
     tag: &'static str,
     description: Description,
     location: Option<(&'static str, u32)>,
-
-    type_id: TypeId,
-    variants: &'static [&'static str],
-    original: Option<Arc<dyn Error + 'static + Send + Sync>>,
+    original: Option<Arc<dyn Any + Send + Sync>>,
 }
 
 impl Entry {
@@ -23,12 +19,9 @@ impl Entry {
         D: Doom,
     {
         Entry {
-            tag: D::VARIANTS[doom.variant()],
+            tag: doom.tag(),
             description: Doom::description(doom),
             location: None,
-
-            type_id: TypeId::of::<D>(),
-            variants: D::VARIANTS,
             original: None,
         }
     }
@@ -58,15 +51,7 @@ impl Entry {
         self.location
     }
 
-    pub fn type_id(&self) -> TypeId {
-        self.type_id
-    }
-
-    pub fn variants(&self) -> &'static [&'static str] {
-        self.variants
-    }
-
-    pub fn original(&self) -> Option<&(dyn Error + 'static + Send + Sync)> {
+    pub fn original(&self) -> Option<&dyn Any> {
         match &self.original {
             Some(original) => Some(original.as_ref()),
             None => None,

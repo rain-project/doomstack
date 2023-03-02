@@ -2,13 +2,11 @@ use crate::{Description, Stack, Top};
 use std::error;
 
 pub trait Doom: error::Error + 'static + Sized + Send + Sync {
-    const VARIANTS: &'static [&'static str];
-
     fn acquire();
     fn release();
     fn store() -> bool;
 
-    fn variant(&self) -> usize;
+    fn tag(&self) -> &'static str;
     fn description(&self) -> Description;
 
     fn into_top(self) -> Top<Self> {
