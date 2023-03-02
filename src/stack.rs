@@ -1,5 +1,8 @@
 use crate::{Doom, Entry, Top};
-use std::fmt::{self, Debug, Display, Formatter};
+use std::{
+    error::Error,
+    fmt::{self, Debug, Display, Formatter},
+};
 
 #[derive(Clone)]
 pub struct Stack {
@@ -38,6 +41,8 @@ impl Stack {
         self.entries.last_mut().unwrap().set_original(doom);
     }
 }
+
+impl Error for Stack {}
 
 impl Display for Stack {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
