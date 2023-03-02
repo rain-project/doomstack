@@ -2,8 +2,6 @@ use crate::{Description, Stack, Top};
 use std::error;
 
 pub trait Doom: error::Error + 'static + Sized + Send + Sync {
-    fn acquire();
-    fn release();
     fn store() -> bool;
 
     fn tag(&self) -> &'static str;
