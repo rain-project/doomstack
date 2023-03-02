@@ -1,5 +1,9 @@
 use std::fmt::{self, Debug, Display, Formatter};
 
+/// An error description. To maximize efficiency, a `Description` can either be
+/// a `Static` (`&'static str`) or `Owned` (`String`) string. This allows
+/// `Description`s that are known at compile time to cause no allocations and
+/// have no memory footprint at runtime.
 #[derive(Clone)]
 pub enum Description {
     Static(&'static str),
@@ -7,6 +11,17 @@ pub enum Description {
 }
 
 impl Description {
+    /// Extracts a string slice containing the entire `Description`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use doomstack::Description;
+    ///
+    /// let description = Description::Owned("Oupsie!".to_owned());
+    ///
+    /// assert_eq!("Oupsie!", description.as_str());
+    /// ```
     pub fn as_str(&self) -> &str {
         match self {
             Description::Static(description) => description,
