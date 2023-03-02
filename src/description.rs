@@ -5,7 +5,7 @@ use std::fmt::{self, Debug, Display, Formatter};
 /// To maximize efficiency, a [`Description`] can either be a [`Static`] ([`&'static str`])
 /// or [`Owned`] ([`String`]) string. This allows [`Description`]s that are known at compile
 /// time to cause no allocations and have no memory footprint at runtime.
-/// 
+///
 /// [`Description`]: crate::Description
 /// [`Static`]: crate::Description::Static
 /// [`Owned`]: crate::Description::Owned
