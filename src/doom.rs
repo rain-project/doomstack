@@ -1,5 +1,11 @@
 use crate::{Description, Stack, Top};
 
+/// `Doom` is a trait representing the basic expectations for `doomstack` errors.
+///
+/// Errors must describe themselves via `Doom::tag` (which should identify the error
+/// type with a short, one-word, statically-defined tag) and `Doom::description`
+/// (which should provide a one-sentence description of the error, and can be either
+/// statically or dinamically defined).
 pub trait Doom: 'static + Sized + Send + Sync {
     fn keep_original() -> bool;
 
