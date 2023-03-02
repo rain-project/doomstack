@@ -17,16 +17,6 @@ impl Stack {
         self.entries.as_slice()
     }
 
-    pub(crate) fn store<D>(mut self, doom: D) -> Self
-    where
-        D: Doom,
-    {
-        let last = self.entries.pop().unwrap();
-        self.entries.push(last.store(doom));
-
-        self
-    }
-
     pub fn push<D>(mut self, doom: D) -> Top<D>
     where
         D: Doom,
@@ -37,11 +27,15 @@ impl Stack {
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        let last = self.entries.pop().unwrap();
-        let last = last.spot(location);
-        self.entries.push(last);
-
+        self.entries.last_mut().unwrap().spot(location);
         self
+    }
+
+    pub(crate) fn store<D>(&mut self, doom: D)
+    where
+        D: Doom,
+    {
+        self.entries.last_mut().unwrap().store(doom);
     }
 }
 

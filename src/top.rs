@@ -5,20 +5,20 @@ use std::{
 };
 
 #[derive(Clone)]
-pub struct Top<T: Doom> {
-    top: T,
+pub struct Top<D: Doom> {
+    top: D,
     stack: Stack,
 }
 
-impl<T> Top<T>
+impl<D> Top<D>
 where
-    T: Doom,
+    D: Doom,
 {
-    pub(crate) fn new(top: T, stack: Stack) -> Self {
+    pub(crate) fn new(top: D, stack: Stack) -> Self {
         Top { top, stack }
     }
 
-    pub fn top(&self) -> &T {
+    pub fn top(&self) -> &D {
         &self.top
     }
 
@@ -30,9 +30,9 @@ where
         self.stack.entries()
     }
 
-    pub fn push<D>(self, doom: D) -> Top<D>
+    pub fn push<P>(self, doom: P) -> Top<P>
     where
-        D: Doom,
+        P: Doom,
     {
         let stack = Stack::from(self);
         stack.push(doom)
@@ -43,41 +43,41 @@ where
         self
     }
 
-    pub fn pot<S>(self, doom: S, location: (&'static str, u32)) -> Top<S>
+    pub fn pot<P>(self, doom: P, location: (&'static str, u32)) -> Top<P>
     where
-        S: Doom,
+        P: Doom,
     {
         self.push(doom).spot(location)
     }
 }
 
-impl<T> From<Top<T>> for Stack
+impl<D> From<Top<D>> for Stack
 where
-    T: Doom,
+    D: Doom,
 {
-    fn from(top: Top<T>) -> Self {
-        if T::store() {
-            top.stack.store(top.top)
-        } else {
-            top.stack
+    fn from(mut top: Top<D>) -> Self {
+        if D::store() {
+            top.stack.store(top.top);
         }
+
+        top.stack
     }
 }
 
-impl<T> Error for Top<T> where T: Doom {}
+impl<D> Error for Top<D> where D: Doom {}
 
-impl<T> Display for Top<T>
+impl<D> Display for Top<D>
 where
-    T: Doom,
+    D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{}", self.stack)
     }
 }
 
-impl<T> Debug for Top<T>
+impl<D> Debug for Top<D>
 where
-    T: Doom,
+    D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
         write!(f, "{:?}", self.stack)

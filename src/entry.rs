@@ -26,19 +26,6 @@ impl Entry {
         }
     }
 
-    pub(crate) fn store<D>(mut self, doom: D) -> Self
-    where
-        D: Doom,
-    {
-        self.original = Some(Arc::new(doom));
-        self
-    }
-
-    pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        self.location = Some(location);
-        self
-    }
-
     pub fn tag(&self) -> &'static str {
         self.tag
     }
@@ -51,11 +38,19 @@ impl Entry {
         self.location
     }
 
-    pub fn original(&self) -> Option<&dyn Any> {
-        match &self.original {
-            Some(original) => Some(original.as_ref()),
-            None => None,
-        }
+    pub fn original(&self) -> Option<&(dyn Any + Send + Sync)> {
+        self.original.as_ref().map(AsRef::as_ref)
+    }
+
+    pub(crate) fn spot(&mut self, location: (&'static str, u32)) {
+        self.location = Some(location);
+    }
+
+    pub(crate) fn store<D>(&mut self, doom: D)
+    where
+        D: Doom,
+    {
+        self.original = Some(Arc::new(doom));
     }
 }
 
