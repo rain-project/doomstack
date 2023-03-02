@@ -1,7 +1,7 @@
 use crate::{Description, Stack, Top};
-use std::error;
+use std::error::Error;
 
-pub trait Doom: error::Error + 'static + Sized + Send + Sync {
+pub trait Doom: Error + 'static + Sized + Send + Sync {
     fn store() -> bool;
 
     fn tag(&self) -> &'static str;
