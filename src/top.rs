@@ -14,7 +14,7 @@ impl<D> Top<D>
 where
     D: Doom,
 {
-    pub(crate) fn new(top: D, base: Stack) -> Self {
+    pub(crate) fn from_parts(top: D, base: Stack) -> Self {
         Top { top, base }
     }
 

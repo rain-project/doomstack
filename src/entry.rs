@@ -21,7 +21,7 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub(crate) fn new<D>(doom: D) -> Self
+    pub fn archive<D>(doom: D) -> Self
     where
         D: Doom,
     {
@@ -55,7 +55,7 @@ impl Entry {
         self.original.as_ref().map(AsRef::as_ref)
     }
 
-    pub(crate) fn set_location(&mut self, location: (&'static str, u32)) {
+    pub fn spot(&mut self, location: (&'static str, u32)) {
         self.location = Some(location);
     }
 }

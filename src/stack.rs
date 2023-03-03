@@ -4,16 +4,14 @@ use std::{
     fmt::{self, Debug, Display, Formatter},
 };
 
-#[derive(Clone)]
+#[derive(Default, Clone)]
 pub struct Stack {
     entries: Vec<Entry>,
 }
 
 impl Stack {
-    pub(crate) fn new() -> Self {
-        Stack {
-            entries: Vec::new(),
-        }
+    pub fn new() -> Self {
+        Default::default()
     }
 
     pub fn entries(&self) -> &[Entry] {
@@ -24,19 +22,19 @@ impl Stack {
     where
         D: Doom,
     {
-        Top::new(doom, self)
+        Top::from_parts(doom, self)
     }
 
-    pub(crate) fn push_as_stack<D>(mut self, doom: D) -> Self
+    pub fn push_as_stack<D>(mut self, doom: D) -> Self
     where
         D: Doom,
     {
-        self.entries.push(Entry::new(doom));
+        self.entries.push(Entry::archive(doom));
         self
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        self.entries.last_mut().unwrap().set_location(location);
+        self.entries.last_mut().unwrap().spot(location);
         self
     }
 
