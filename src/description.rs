@@ -4,13 +4,11 @@ use std::fmt::{self, Debug, Display, Formatter};
 ///
 /// To maximize efficiency, a [`Description`] can either be a [`Static`] ([`&'static str`])
 /// or [`Owned`] ([`String`]) string. This allows [`Description`]s that are known at compile
-/// time to cause no allocations and have no memory footprint at runtime.
+/// time to cause no allocations and have no heap footprint at runtime.
 ///
-/// [`Description`]: crate::Description
 /// [`Static`]: crate::Description::Static
 /// [`Owned`]: crate::Description::Owned
-/// [`&'static str`]: prim@str "&'static str"
-/// [`String`]: std::string::String
+/// [`&'static str`]: str
 #[derive(Clone)]
 pub enum Description {
     Static(&'static str),
