@@ -1,5 +1,10 @@
 use std::fmt::{self, Debug, Display, Formatter};
 
+/// The location of a line of code.
+///
+/// See [`here!()`] for a simple way to get the [`Location`] of a piece of code.
+///
+/// [`here!()`]: crate::here!
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub struct Location {
     pub file: &'static str,
