@@ -14,16 +14,22 @@ pub struct Entry {
 }
 
 impl Entry {
-    pub(crate) fn new<D>(doom: &D) -> Self
+    pub(crate) fn new<D>(doom: D) -> Self
     where
         D: Doom,
     {
-        Entry {
+        let mut entry = Entry {
             tag: doom.tag(),
-            description: Doom::description(doom),
+            description: Doom::description(&doom),
             location: None,
             original: None,
+        };
+
+        if D::keep_original() {
+            entry.original = Some(Arc::new(doom));
         }
+
+        entry
     }
 
     pub fn tag(&self) -> &'static str {
@@ -44,13 +50,6 @@ impl Entry {
 
     pub(crate) fn set_location(&mut self, location: (&'static str, u32)) {
         self.location = Some(location);
-    }
-
-    pub(crate) fn set_original<D>(&mut self, doom: D)
-    where
-        D: Doom,
-    {
-        self.original = Some(Arc::new(doom));
     }
 }
 

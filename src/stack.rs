@@ -20,13 +20,19 @@ impl Stack {
         self.entries.as_slice()
     }
 
-    pub fn push<D>(mut self, doom: D) -> Top<D>
+    pub fn push<D>(self, doom: D) -> Top<D>
     where
         D: Doom,
     {
-        let entry = Entry::new(&doom);
-        self.entries.push(entry);
         Top::new(doom, self)
+    }
+
+    pub(crate) fn push_as_stack<D>(mut self, doom: D) -> Self
+    where
+        D: Doom,
+    {
+        self.entries.push(Entry::new(doom));
+        self
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
@@ -34,11 +40,11 @@ impl Stack {
         self
     }
 
-    pub(crate) fn store_original<D>(&mut self, doom: D)
+    pub fn pot<P>(self, doom: P, location: (&'static str, u32)) -> Top<P>
     where
-        D: Doom,
+        P: Doom,
     {
-        self.entries.last_mut().unwrap().set_original(doom);
+        self.push(doom).spot(location)
     }
 }
 

@@ -1,4 +1,4 @@
-use crate::{Doom, Entry, Stack};
+use crate::{Doom, Stack};
 use std::{
     error::Error,
     fmt::{self, Debug, Display, Formatter},
@@ -7,39 +7,41 @@ use std::{
 #[derive(Clone)]
 pub struct Top<D: Doom> {
     top: D,
-    stack: Stack,
+    base: Stack,
 }
 
 impl<D> Top<D>
 where
     D: Doom,
 {
-    pub(crate) fn new(top: D, stack: Stack) -> Self {
-        Top { top, stack }
+    pub(crate) fn new(top: D, base: Stack) -> Self {
+        Top { top, base }
     }
 
     pub fn top(&self) -> &D {
         &self.top
     }
 
-    pub fn stack(&self) -> &Stack {
-        &self.stack
-    }
-
-    pub fn entries(&self) -> &[Entry] {
-        self.stack.entries()
+    pub fn base(&self) -> &Stack {
+        &self.base
     }
 
     pub fn push<P>(self, doom: P) -> Top<P>
     where
         P: Doom,
     {
-        let stack = Stack::from(self);
-        stack.push(doom)
+        Stack::from(self).push(doom)
+    }
+
+    pub fn push_as_stack<P>(self, doom: P) -> Stack
+    where
+        P: Doom,
+    {
+        Stack::from(self).push_as_stack(doom)
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        self.stack = self.stack.spot(location);
+        self.base = self.base.spot(location);
         self
     }
 
@@ -55,12 +57,9 @@ impl<D> From<Top<D>> for Stack
 where
     D: Doom,
 {
-    fn from(mut top: Top<D>) -> Self {
-        if D::keep_original() {
-            top.stack.store_original(top.top);
-        }
-
-        top.stack
+    fn from(top: Top<D>) -> Self {
+        let Top { top, base: stack } = top;
+        stack.push_as_stack(top)
     }
 }
 
@@ -71,7 +70,7 @@ where
     D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.stack)
+        write!(f, "{}", self.base)
     }
 }
 
@@ -80,6 +79,6 @@ where
     D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{:?}", self.stack)
+        write!(f, "{:?}", self.base)
     }
 }
