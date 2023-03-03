@@ -3,8 +3,8 @@ use crate::{Description, Stack, Top};
 /// [`Doom`] is a trait representing the basic expectations for [`doomstack`] errors.
 ///
 /// Errors must describe themselves via [`Doom::tag`] (which should identify the error
-/// type with a short, one-word, statically-defined tag, usually the type or variant of 
-/// the error) and [`Doom::description`] (which should provide a one-sentence description 
+/// type with a short, one-word, statically-defined tag, usually the type or variant of
+/// the error) and [`Doom::description`] (which should provide a one-sentence description
 /// of the error, and can be either statically or dynamically defined).
 ///
 /// Optionally, a [`doomstack`] error can override [`Doom::keep_original`] to indicate
@@ -16,13 +16,13 @@ use crate::{Description, Stack, Top};
 ///
 /// ```
 /// use doomstack::{Description, Doom};
-/// 
+///
 /// enum GardeningError {
 ///     TooMuchWater,
 ///     ForgotFertilizer,
 ///     DroppedFlowerpot { height: f64 },
 /// }
-/// 
+///
 /// impl Doom for GardeningError {
 ///     fn tag(&self) -> &'static str {
 ///         match self {
@@ -31,7 +31,7 @@ use crate::{Description, Stack, Top};
 ///             GardeningError::DroppedFlowerpot { .. } => "GardeningError::DroppedFlowerpot",
 ///         }
 ///     }
-/// 
+///
 ///     fn description(&self) -> Description {
 ///         match self {
 ///             GardeningError::TooMuchWater => {
@@ -78,7 +78,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///         Description::Static("Made a mess")
     ///     }
     ///
-    ///     fn keep_original() -> bool {
+    ///     fn keep_original(&self) -> bool {
     ///         true
     ///     }
     /// }
@@ -97,14 +97,14 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     /// [`Entry`]: crate::Entry
     /// [`Box<dyn Any>`]: std::any::Any
-    fn keep_original() -> bool {
+    fn keep_original(&self) -> bool {
         false
     }
 
     /// Wraps `self` into a [`Top<Self>`] whose [`top()`] is `self` and whose [`base()`] has no entries.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use doomstack::{Description, Doom};
     ///
@@ -123,7 +123,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     /// let oupsie = Oupsie(42);
     /// let top = oupsie.clone().into_top();
-    /// 
+    ///
     /// assert_eq!(top.top(), &oupsie);
     /// ```
     ///
@@ -134,9 +134,9 @@ pub trait Doom: 'static + Sized + Send + Sync {
     }
 
     /// Wraps `self` into a [`Stack`] whose only [`Entry`] archives `self`.
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use doomstack::{Description, Doom};
     ///
@@ -153,7 +153,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     /// }
     ///
     /// let stack = Oupsie.into_stack();
-    /// 
+    ///
     /// assert_eq!(stack.entries()[0].tag(), "Oupsie");
     /// ```
     ///
@@ -164,9 +164,9 @@ pub trait Doom: 'static + Sized + Send + Sync {
 
     /// Wraps `self` into a [`Top<Self>`] (as in [`Doom::into_top()`]), then into the `Err`
     /// variant of a [`Result`].
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use doomstack::{Description, Doom, Top};
     ///
@@ -181,7 +181,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///         Description::Static("The number provided is not even")
     ///     }
     /// }
-    /// 
+    ///
     /// fn checked_half(n: u32) -> Result<u32, Top<NotEven>> {
     ///     if n % 2 == 0 {
     ///         Ok(n / 2)
@@ -190,16 +190,16 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///     }
     /// }
     /// ```
-    /// 
+    ///
     fn fail<O>(self) -> Result<O, Top<Self>> {
         Err(self.into_top())
     }
 
     /// Wraps `self` into a `Stack` (as in [`Doom::into_stack()`]), then into the `Err`
     /// variant of a [`Result`].
-    /// 
+    ///
     /// # Examples
-    /// 
+    ///
     /// ```
     /// use doomstack::{Description, Doom, Stack};
     ///
@@ -214,7 +214,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///         Description::Static("The number provided is not even")
     ///     }
     /// }
-    /// 
+    ///
     /// fn checked_half(n: u32) -> Result<u32, Stack> {
     ///     if n % 2 == 0 {
     ///         Ok(n / 2)
@@ -223,7 +223,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///     }
     /// }
     /// ```
-    /// 
+    ///
     fn fail_as_stack<O>(self) -> Result<O, Stack> {
         Err(self.into_stack())
     }

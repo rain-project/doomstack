@@ -25,7 +25,7 @@ impl Entry {
             original: None,
         };
 
-        if D::keep_original() {
+        if doom.keep_original() {
             entry.original = Some(Arc::new(doom));
         }
 
