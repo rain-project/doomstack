@@ -101,7 +101,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
         false
     }
 
-    /// Wraps `self` into a [`Top<Self>`] whose [`top()`] is `self` and whose [`base()`] has no entries.
+    /// Wraps `self` into a [`Top<Self>`] whose [`doom()`] is `self` and whose [`stack()`] has no entries.
     ///
     /// # Examples
     ///
@@ -127,8 +127,8 @@ pub trait Doom: 'static + Sized + Send + Sync {
     /// assert_eq!(top.doom(), &oupsie);
     /// ```
     ///
-    /// [`top()`]: crate::Top::top
-    /// [`base()`]: crate::Top::base
+    /// [`doom()`]: crate::Top::doom
+    /// [`stack()`]: crate::Top::stack
     fn into_top(self) -> Top<Self> {
         Stack::new().push(self)
     }
