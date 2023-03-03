@@ -1,4 +1,4 @@
-use crate::{Doom, Stack};
+use crate::{Doom, Location, Stack};
 use std::{
     error::Error,
     fmt::{self, Debug, Display, Formatter},
@@ -7,7 +7,7 @@ use std::{
 #[derive(Clone)]
 pub struct Top<D: Doom> {
     doom: D,
-    location: Option<(&'static str, u32)>,
+    location: Option<Location>,
     stack: Stack,
 }
 
@@ -27,7 +27,7 @@ where
         &self.doom
     }
 
-    pub fn location(&self) -> Option<(&'static str, u32)> {
+    pub fn location(&self) -> Option<Location> {
         self.location
     }
 
@@ -49,12 +49,12 @@ where
         Stack::from(self).push_as_stack(doom)
     }
 
-    pub fn spot(mut self, location: (&'static str, u32)) -> Self {
+    pub fn spot(mut self, location: Location) -> Self {
         self.location = Some(location);
         self
     }
 
-    pub fn pot<P>(self, doom: P, location: (&'static str, u32)) -> Top<P>
+    pub fn pot<P>(self, doom: P, location: Location) -> Top<P>
     where
         P: Doom,
     {
@@ -104,8 +104,8 @@ where
                 f,
                 "[{} @ {}:{}] {}",
                 self.doom.tag(),
-                location.0,
-                location.1,
+                location.file,
+                location.line,
                 self.doom.description()
             )?;
         } else {

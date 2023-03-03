@@ -1,4 +1,4 @@
-use crate::{Doom, Entry, Top};
+use crate::{Doom, Entry, Location, Top};
 use std::{
     error::Error,
     fmt::{self, Debug, Display, Formatter},
@@ -33,12 +33,12 @@ impl Stack {
         self
     }
 
-    pub fn spot(mut self, location: (&'static str, u32)) -> Self {
+    pub fn spot(mut self, location: Location) -> Self {
         self.entries.last_mut().unwrap().spot(location);
         self
     }
 
-    pub fn pot<P>(self, doom: P, location: (&'static str, u32)) -> Top<P>
+    pub fn pot<P>(self, doom: P, location: Location) -> Top<P>
     where
         P: Doom,
     {

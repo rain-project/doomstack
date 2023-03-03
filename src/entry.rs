@@ -1,4 +1,4 @@
-use crate::{Description, Doom};
+use crate::{Description, Doom, Location};
 use std::{
     any::Any,
     fmt::{self, Debug, Display, Formatter},
@@ -16,7 +16,7 @@ use std::{
 pub struct Entry {
     tag: &'static str,
     description: Description,
-    location: Option<(&'static str, u32)>,
+    location: Option<Location>,
     original: Option<Arc<dyn Any + Send + Sync>>,
 }
 
@@ -47,7 +47,7 @@ impl Entry {
         self.description.as_str()
     }
 
-    pub fn location(&self) -> Option<(&'static str, u32)> {
+    pub fn location(&self) -> Option<Location> {
         self.location
     }
 
@@ -55,7 +55,7 @@ impl Entry {
         self.original.as_ref().map(AsRef::as_ref)
     }
 
-    pub fn spot(&mut self, location: (&'static str, u32)) {
+    pub fn spot(&mut self, location: Location) {
         self.location = Some(location);
     }
 }
@@ -72,7 +72,7 @@ impl Debug for Entry {
             write!(
                 f,
                 "[{} @ {}:{}] {}",
-                self.tag, location.0, location.1, self.description
+                self.tag, location.file, location.line, self.description
             )?;
         } else {
             write!(f, "[{}] {}", self.tag, self.description)?;
