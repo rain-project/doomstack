@@ -5,6 +5,13 @@ use std::{
     sync::Arc,
 };
 
+/// An [`Entry`] is an element of an error [`Stack`], archiving a [`Doom`] error.
+///
+/// In archiving a [`Doom`] error, an [`Entry`] captures the error's [`Doom::description()`]
+/// and [`Doom::tag()`], along with a copy of the original error (held in a [`Box<dyn Any>`]),
+/// if prescribed by [`Doom::keep_original()`].
+///
+/// [`Stack`]: crate::Stack
 #[derive(Clone)]
 pub struct Entry {
     tag: &'static str,
