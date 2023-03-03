@@ -124,7 +124,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     /// let oupsie = Oupsie(42);
     /// let top = oupsie.clone().into_top();
     ///
-    /// assert_eq!(top.top(), &oupsie);
+    /// assert_eq!(top.doom(), &oupsie);
     /// ```
     ///
     /// [`top()`]: crate::Top::top
