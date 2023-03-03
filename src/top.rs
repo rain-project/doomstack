@@ -6,24 +6,33 @@ use std::{
 
 #[derive(Clone)]
 pub struct Top<D: Doom> {
-    top: D,
-    base: Stack,
+    doom: D,
+    location: Option<(&'static str, u32)>,
+    stack: Stack,
 }
 
 impl<D> Top<D>
 where
     D: Doom,
 {
-    pub(crate) fn from_parts(top: D, base: Stack) -> Self {
-        Top { top, base }
+    pub(crate) fn from_parts(doom: D, stack: Stack) -> Self {
+        Top {
+            doom,
+            location: None,
+            stack,
+        }
     }
 
-    pub fn top(&self) -> &D {
-        &self.top
+    pub fn doom(&self) -> &D {
+        &self.doom
     }
 
-    pub fn base(&self) -> &Stack {
-        &self.base
+    pub fn location(&self) -> Option<(&'static str, u32)> {
+        self.location
+    }
+
+    pub fn stack(&self) -> &Stack {
+        &self.stack
     }
 
     pub fn push<P>(self, doom: P) -> Top<P>
@@ -41,7 +50,7 @@ where
     }
 
     pub fn spot(mut self, location: (&'static str, u32)) -> Self {
-        self.base = self.base.spot(location);
+        self.location = Some(location);
         self
     }
 
@@ -58,8 +67,19 @@ where
     D: Doom,
 {
     fn from(top: Top<D>) -> Self {
-        let Top { top, base: stack } = top;
-        stack.push_as_stack(top)
+        let Top {
+            doom: top,
+            location,
+            stack,
+        } = top;
+
+        let stack = stack.push_as_stack(top);
+
+        if let Some(location) = location {
+            stack.spot(location)
+        } else {
+            stack
+        }
     }
 }
 
@@ -70,7 +90,7 @@ where
     D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{}", self.base)
+        write!(f, "<top: {}>", self.doom.tag())
     }
 }
 
@@ -79,6 +99,19 @@ where
     D: Doom,
 {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        write!(f, "{:?}", self.base)
+        if let Some(location) = self.location {
+            writeln!(
+                f,
+                "[{} @ {}:{}] {}",
+                self.doom.tag(),
+                location.0,
+                location.1,
+                self.doom.description()
+            )?;
+        } else {
+            writeln!(f, "[{}] {}", self.doom.tag(), self.doom.description())?;
+        }
+
+        write!(f, "{:?}", self.stack)
     }
 }
