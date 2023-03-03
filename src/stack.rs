@@ -14,8 +14,8 @@ impl Stack {
         Default::default()
     }
 
-    pub fn entries(&self) -> &[Entry] {
-        self.entries.as_slice()
+    pub fn entries(&self) -> impl Iterator<Item = &Entry> {
+        self.entries.iter().rev()
     }
 
     pub fn push<D>(self, doom: D) -> Top<D>
@@ -56,7 +56,7 @@ impl Display for Stack {
 
 impl Debug for Stack {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        for entry in self.entries.iter().rev() {
+        for entry in self.entries() {
             writeln!(f, "{entry:?}")?;
         }
 
