@@ -56,8 +56,8 @@ impl Display for Stack {
 
 impl Debug for Stack {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
-        for frame in self.entries.iter().rev() {
-            writeln!(f, "{frame:?}")?;
+        for entry in self.entries.iter().rev() {
+            writeln!(f, "{entry:?}")?;
         }
 
         Ok(())
