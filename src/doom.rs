@@ -65,7 +65,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     /// # Examples
     ///
     /// ```
-    /// use doomstack::{Description, Doom};
+    /// use doomstack::{Description, Doom, Entry};
     ///
     /// struct Oupsie(u64);
     ///
@@ -84,9 +84,9 @@ pub trait Doom: 'static + Sized + Send + Sync {
     /// }
     ///
     /// let oupsie = Oupsie(42);
-    /// let stack = oupsie.into_stack();
+    /// let entry = Entry::archive(oupsie);
     ///
-    /// let value = stack.entries()[0]
+    /// let value = entry
     ///     .original()
     ///     .unwrap()
     ///     .downcast_ref::<Oupsie>()
@@ -154,7 +154,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     /// let stack = Oupsie.into_stack();
     ///
-    /// assert_eq!(stack.entries()[0].tag(), "Oupsie");
+    /// assert_eq!(stack.entries().next().unwrap().tag(), "Oupsie");
     /// ```
     ///
     /// [`Entry`]: crate::Entry
