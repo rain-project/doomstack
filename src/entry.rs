@@ -100,22 +100,22 @@ impl Entry {
     }
 
     /// Returns the (optional) [`Location`] at which `self` was last [`spot()`]-ted.
-    /// 
+    ///
     /// [`spot()`]: crate::Entry::spot
     pub fn location(&self) -> Option<Location> {
         self.location
     }
 
-    /// Returns the original [`Doom`] error the [`Entry`] archived (if prescribed by 
+    /// Returns the original [`Doom`] error the [`Entry`] archived (if prescribed by
     /// [`Doom::keep_original()`]).
     pub fn original(&self) -> Option<&(dyn Any + Send + Sync)> {
         self.original.as_ref().map(AsRef::as_ref)
     }
 
     /// Sets the [`Location`] the [`Entry`] was last spotted at.
-    /// 
+    ///
     /// Usually used in conjuction with the [`here!()`] macro.
-    /// 
+    ///
     /// [`here!()`]: crate::here!
     pub fn spot(&mut self, location: Location) {
         self.location = Some(location);
