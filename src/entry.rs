@@ -69,11 +69,7 @@ impl Display for Entry {
 impl Debug for Entry {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), fmt::Error> {
         if let Some(location) = self.location {
-            write!(
-                f,
-                "[{} @ {}:{}] {}",
-                self.tag, location.file, location.line, self.description
-            )?;
+            write!(f, "[{} @ {}] {}", self.tag, location, self.description)?;
         } else {
             write!(f, "[{}] {}", self.tag, self.description)?;
         }

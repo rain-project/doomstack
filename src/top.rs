@@ -102,10 +102,9 @@ where
         if let Some(location) = self.location {
             writeln!(
                 f,
-                "[{} @ {}:{}] {}",
+                "[{} @ {}] {}",
                 self.doom.tag(),
-                location.file,
-                location.line,
+                location,
                 self.doom.description()
             )?;
         } else {
