@@ -233,7 +233,7 @@
 //!
 //!     Ok(())
 //! }
-//! 
+//!
 //! if let Err(top) = tend_garden() {
 //!     println!("This time the casualties were {}", top.doom().casualties);
 //!     println!("Leading up to the catastrophe:");
@@ -243,10 +243,10 @@
 //! }
 //! ```
 //!
-//! The above examples are lengthy and pedantic to be more understandable, but don't 
+//! The above examples are lengthy and pedantic to be more understandable, but don't
 //! worry: Doomstack comes packed macros and syntax sugar that makes error handling
 //! easy as cake. Read around to learn more!
-//! 
+//!
 //! [`tag`]: Doom::tag
 //! [`description`]: Doom::description
 //! [`keep_original`]: Doom::keep_original

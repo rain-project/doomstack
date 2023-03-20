@@ -17,15 +17,15 @@ use std::{
 /// storing the error itself (which might have, e.g., fields that are useful for later
 /// error-handling) only if requested by [`Doom::keep_original()`]. In that case, the
 /// error is stored in its original form by its [`Entry`], but this comes at a cost in
-/// terms of heap allocation and dynamic typing (see [`Entry`] for additional details).
+/// terms of heap allocation and dynamic dispatch (see [`Entry`] for additional details).
 ///
 /// Unlike a [`Stack`], a [`Top`] is a generic type, and as such it can store its top
 /// error in its original form (along with whatever useful fields it might have) without
 /// the need for heap allocation or dynamic dispatching. A [`Top<D>`] stores an error of
-/// type `D` on top of a [`Stack`] of (zero or more) [`Entry`]-ies archiving older errors.
-/// As such, [`Top<D>`] strikes a compromise, allowing cheap, stack-based access to its
-/// top error, at the cost of [`Top`] being a generic type: as such, [`Top`]s are not
-/// interchangeable in general.
+/// type `D` on top of a [`Stack`] of (zero or more) [`Entry`]-ies archiving `D`'s
+/// predecessors. As such, [`Top<D>`] strikes a compromise, allowing cheap, stack-based
+/// access to its top error, at the cost of [`Top`] being a generic type: as such,
+/// [`Top`]s are not interchangeable in general.
 ///
 /// # Converting and pushing
 ///
