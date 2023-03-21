@@ -1,7 +1,6 @@
 // Modules
 
 mod doom;
-mod syn_ext;
 
 // Interface
 
