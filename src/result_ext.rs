@@ -17,7 +17,11 @@ pub trait ResultExt<O> {
     /// Calling `result.push(doom).spot(location)` is equivalent to calling `result.pot(doom, location)`.
     fn pot<D>(self, doom: D, location: Location) -> Result<O, Top<D>>
     where
-        D: Doom;
+        Self: Sized,
+        D: Doom,
+    {
+        self.push(doom).spot(location)
+    }
 }
 
 impl<O> ResultExt<O> for Result<O, Stack> {
@@ -30,13 +34,6 @@ impl<O> ResultExt<O> for Result<O, Stack> {
 
     fn spot(self, location: Location) -> Self {
         self.map_err(|error| error.spot(location))
-    }
-
-    fn pot<D>(self, doom: D, location: Location) -> Result<O, Top<D>>
-    where
-        D: Doom,
-    {
-        self.push(doom).spot(location)
     }
 }
 
@@ -53,12 +50,5 @@ where
 
     fn spot(self, location: Location) -> Self {
         self.map_err(|error| error.spot(location))
-    }
-
-    fn pot<D>(self, doom: D, location: Location) -> Result<O, Top<D>>
-    where
-        D: Doom,
-    {
-        self.push(doom).spot(location)
     }
 }
