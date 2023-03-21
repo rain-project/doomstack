@@ -256,6 +256,7 @@ mod doom;
 mod entry;
 mod here;
 mod location;
+mod result_ext;
 mod stack;
 mod top;
 
@@ -263,5 +264,6 @@ pub use description::Description;
 pub use doom::Doom;
 pub use entry::Entry;
 pub use location::Location;
+pub use result_ext::ResultExt;
 pub use stack::Stack;
 pub use top::Top;
