@@ -1,4 +1,4 @@
-use crate::{Description, Stack, Top};
+use crate::{Description, Location, ResultExt, Stack, Top};
 
 /// [`Doom`] is a trait representing the basic expectations for [`doomstack`] errors.
 ///
@@ -195,6 +195,13 @@ pub trait Doom: 'static + Sized + Send + Sync {
         Err(self.into_top())
     }
 
+    /// Syntax sugar for [`Doom::fail`], then [`ResultExt::spot`].
+    ///
+    /// Calling `doom.fail().spot(location)` is equivalent to calling `doom.fot(location)`.
+    fn fot<O>(self, location: Location) -> Result<O, Top<Self>> {
+        Err(self.into_top()).spot(location)
+    }
+
     /// Wraps `self` into a `Stack` (as in [`Doom::into_stack()`]), then into the `Err`
     /// variant of a [`Result`].
     ///
@@ -226,5 +233,12 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     fn fail_as_stack<O>(self) -> Result<O, Stack> {
         Err(self.into_stack())
+    }
+
+    /// Syntax sugar for [`Doom::fail_as_stack`], then [`ResultExt::spot`].
+    /// 
+    /// Calling `doom.fail_as_stack().spot(location)` is equivalent to calling `doom.fot_as_stack(location)`.
+    fn fot_as_stack<O>(self, location: Location) -> Result<O, Stack> {
+        Err(self.into_stack()).spot(location)
     }
 }
