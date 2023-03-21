@@ -6,7 +6,7 @@ use std::{
 
 /// A stack of [`Entry`]-ies, each archiving a [`Doom`] error.
 ///
-/// _For the difference between [`Stack`]s and [`Top`]s, please refer to [`Top`]'s 
+/// _For the difference between [`Stack`]s and [`Top`]s, please refer to [`Top`]'s
 /// documentation._
 ///
 /// # Examples

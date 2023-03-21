@@ -5,7 +5,7 @@ use std::{
 };
 
 /// A [`Doom`] error on top of a [`Stack`] of [`Entry`]-ies.
-/// 
+///
 /// # The difference between [`Stack`]s and [`Top`]s
 ///
 /// Both [`Stack`]s and [`Top`]s repesent a stack of [`Doom`] errors (most recent on top),
@@ -20,13 +20,13 @@ use std::{
 /// terms of heap allocation and dynamic dispatch (see [`Entry`] for additional details).
 ///
 /// Unlike a [`Stack`], a [`Top`] is a generic type, and as such it can store its top
-/// error in its original form (allowing, e.g., direct access to whatever useful fields 
-/// it might have) without the need for heap allocation or dynamic dispatching. A 
-/// [`Top<D>`] stores an error of type `D` on top of a [`Stack`] of (zero or more) 
-/// [`Entry`]-ies archiving `D`'s predecessors. As such, [`Top<D>`] strikes a compromise, 
-/// allowing cheap, stack-based access to its top error, at the cost of [`Top`] being a 
+/// error in its original form (allowing, e.g., direct access to whatever useful fields
+/// it might have) without the need for heap allocation or dynamic dispatching. A
+/// [`Top<D>`] stores an error of type `D` on top of a [`Stack`] of (zero or more)
+/// [`Entry`]-ies archiving `D`'s predecessors. As such, [`Top<D>`] strikes a compromise,
+/// allowing cheap, stack-based access to its top error, at the cost of [`Top`] being a
 /// generic type: as such, [`Top`]s are not interchangeable in general.
-/// 
+///
 /// # Converting and pushing
 ///
 /// A [`Top`] can be converted into a [`Stack`] ([`Stack`] implements `From<Top<D>>`
@@ -42,7 +42,7 @@ use std::{
 ///  - By invoking [`Stack::push_as_stack`]. The error is archived in an [`Entry`],
 ///    which is placed at the top of the [`Stack`]. This is equivalent to invoking
 ///    [`Stack::push`], then [`Stack::from`] on the result.
-/// 
+///
 /// [`Entry`]: crate::Entry
 #[derive(Clone)]
 pub struct Top<D: Doom> {
@@ -65,7 +65,7 @@ where
     }
 
     /// Returns a reference to the [`Top`]'s top error.
-    /// 
+    ///
     /// `Top<D>` stores its top (most recent) error as a concrete `D` instance. [`Top::doom`]
     /// returns a reference to that error.
     pub fn doom(&self) -> &D {
@@ -73,29 +73,29 @@ where
     }
 
     /// Returns the (optional) [`Location`] at which `self` was last `spot()`-ted.
-    /// 
+    ///
     /// [`spot()`]: Top::spot
     pub fn location(&self) -> Option<Location> {
         self.location
     }
 
     /// Returns a reference to the [`Stack`] of `self`'s predecessor.
-    /// 
+    ///
     /// [`Top`] stores all but the top error in their archived form, as [`Entry`]-ies in a
     /// [`Stack`]. [`Top::stack`] returns a reference to that [`Stack`].
-    /// 
+    ///
     /// [`Entry`]: crate::Entry
     pub fn stack(&self) -> &Stack {
         &self.stack
     }
 
     /// Pushes a [`Doom`] error on top of the current [`Top`], producing a new [`Top`].
-    /// 
-    /// The resulting [`Top`] stores the new error as-is: this is useful, e.g., if the error 
-    /// being pushed contains fields that are useful for error handling. Note that, upon 
+    ///
+    /// The resulting [`Top`] stores the new error as-is: this is useful, e.g., if the error
+    /// being pushed contains fields that are useful for error handling. Note that, upon
     /// [`push()`]-ing, `self`'s top error is archived in an [`Entry`], which is pushed
     /// on the top of the new [`Top`]'s [`stack`].
-    /// 
+    ///
     /// [`Entry`]: crate::Entry
     /// [`push()`]: Top::push
     /// [`stack`]: Top::stack
@@ -107,9 +107,9 @@ where
     }
 
     /// Pushes a [`Doom`] error on top of the current [`Top`], producing a [`Stack`].
-    /// 
+    ///
     /// The resulting [`Stack`] stores the new error as an [`Entry`], in its archived form.
-    /// 
+    ///
     /// [`Entry`]: crate::Entry
     pub fn push_as_stack<P>(self, doom: P) -> Stack
     where
@@ -125,7 +125,7 @@ where
     }
 
     /// Syntax sugar for [`Top::push`], then [`Top::spot`].
-    /// 
+    ///
     /// Calling `top.push(doom).spot(location)` is equivalent to calling `top.pot(doom, location)`.
     pub fn pot<P>(self, doom: P, location: Location) -> Top<P>
     where
