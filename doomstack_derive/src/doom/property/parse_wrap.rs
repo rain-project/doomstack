@@ -12,7 +12,7 @@ impl Property {
     /// `body` to be an [`Ident`] (of a wrapping constructor). Returns a
     /// [`Property::Wrap`].
     pub(in crate::doom::property) fn parse_wrap(body: Group) -> Property {
-        let tokens = body.stream().into_iter().collect::<Vec<_>>();
+        let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
 
         // `body` must contain exactly one `Ident`
 
@@ -36,7 +36,7 @@ impl Property {
             .abort();
         }
 
-        let TokenTree::Ident(constructor) = &tokens[0] else {
+        let TokenTree::Ident(constructor) = tokens.remove(0) else {
             Diagnostic::spanned(
                 tokens[0].span(),
                 Level::Error,
@@ -46,8 +46,6 @@ impl Property {
             .abort();
         };
 
-        Property::Wrap {
-            constructor: constructor.clone(),
-        }
+        Property::Wrap { constructor }
     }
 }
