@@ -15,7 +15,11 @@ pub(crate) enum Property {
 }
 
 impl Property {
-    pub fn parse(_attribute: Attribute) -> Option<Self> {
+    pub fn parse(attribute: &Attribute) -> Option<Self> {
+        let (_kind, _body) = Property::tokens(attribute)?;
         todo!()
     }
 }
+
+mod messages;
+mod tokens;
