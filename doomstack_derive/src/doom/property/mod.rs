@@ -18,11 +18,11 @@ pub(crate) enum Property {
 
 impl Property {
     pub fn parse(attribute: &Attribute) -> Option<Self> {
-        let (kind, body) = Property::tokens(attribute)?;
+        let (kind, body) = Property::parse_parts(attribute)?;
 
         let property = match kind.to_string().as_str() {
-            "description" => Property::description(body),
-            "wrap" => Property::wrap(body),
+            "description" => Property::parse_description(body),
+            "wrap" => Property::parse_wrap(body),
             _ => Diagnostic::spanned(kind.span(), Level::Error, UNEXPECTED_KIND.to_string())
                 .help(AVAILABLE_KINDS.to_string())
                 .abort(),
@@ -32,7 +32,7 @@ impl Property {
     }
 }
 
-mod description;
 mod messages;
-mod tokens;
-mod wrap;
+mod parse_description;
+mod parse_parts;
+mod parse_wrap;
