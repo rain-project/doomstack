@@ -65,11 +65,14 @@ impl Property {
                 .abort();
         }
 
+        let kind = tokens.remove(0);
+        let body = tokens.remove(0);
+
         // The first element of `attribute_tokens` must be an `Ident`
 
-        let TokenTree::Ident(kind) = tokens.remove(0) else {
+        let TokenTree::Ident(kind) = kind else {
             Diagnostic::spanned(
-                tokens[0].span(),
+                kind.span(),
                 Level::Error,
                 UNEXPECTED_TOKEN.to_string()
             ).help(ATTRIBUTES_LIKE_FUNCTIONS.to_string())
@@ -78,9 +81,9 @@ impl Property {
 
         // The second element of `attribute_tokens` must be a parenthesized block with the body
 
-        let TokenTree::Group(body) = tokens.remove(0) else {
+        let TokenTree::Group(body) = body else {
             Diagnostic::spanned(
-                tokens[1].span(),
+                body.span(),
                 Level::Error,
                 UNEXPECTED_TOKEN.to_string()
             ).help(ATTRIBUTES_LIKE_FUNCTIONS.to_string())

@@ -36,9 +36,11 @@ impl Property {
             .abort();
         }
 
-        let TokenTree::Ident(constructor) = tokens.remove(0) else {
+        let constructor = tokens.remove(0);
+
+        let TokenTree::Ident(constructor) = constructor else {
             Diagnostic::spanned(
-                tokens[0].span(),
+                constructor.span(),
                 Level::Error,
                 UNEXPECTED_WRAP_TOKEN.to_string(),
             )
