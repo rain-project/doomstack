@@ -5,6 +5,9 @@ pub(in crate::doom::property) mod errors {
     pub const UNEXPECTED_KIND: &str = "unexpected `doom()` attribute";
     pub const MISSING_WRAPPING_CONSTRUCTOR: &str = "missing constructor in `wrap()` attribute";
     pub const UNEXPECTED_WRAP_TOKEN: &str = "unexpected token in `wrap()` attribute";
+    pub const MISSING_DESCRIPTION_FORMAT: &str = "missing format string in `description()` attribute";
+    pub const UNEXPECTED_DESCRIPTION_TOKEN: &str = "unexpected token in `description()` attribute";
+    pub const UNEXPECTED_DESCRIPTION_ARGUMENTS: &str = "unexpected arguments in `description(format, ...)` attribute: `format` does not format any variable";
 }
 
 #[rustfmt::skip]
@@ -19,4 +22,11 @@ pub(in crate::doom::property) mod helps {
     pub const WRAP_STYLE: &str = 
           r#"`wrap` attributes take the identifier of the wrapping constructor:
           `#[doom(wrap(my_error))]`"#;
+
+    pub const DESCRIPTION_STYLE: &str = 
+          r#"`description` attributes take a format string, possibly formatting error fields:
+          `#[doom(description("Error with severity {severity}"))]`
+          struct MyError {
+              severity: u32,
+          }"#;
 }

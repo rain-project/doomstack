@@ -1,4 +1,5 @@
 use crate::doom::property::messages::{errors::*, helps::*};
+use proc_macro2::TokenTree;
 use proc_macro_error::{Diagnostic, Level};
 use syn::{Attribute, Ident, LitStr};
 
@@ -8,8 +9,8 @@ pub(crate) enum Property {
         description: LitStr,
     },
     OwnedDescription {
-        description: LitStr,
-        arguments: Vec<Ident>,
+        format: LitStr,
+        arguments: Vec<TokenTree>,
     },
     Wrap {
         constructor: Ident,
