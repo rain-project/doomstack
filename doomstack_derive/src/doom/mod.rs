@@ -1,5 +1,6 @@
 // Modules
 
+mod description;
 mod property;
 
 // Interface
