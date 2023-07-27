@@ -1,19 +1,18 @@
 use crate::doom::{
     property::messages::{errors::*, helps::*},
-    Property,
+    Description, Property,
 };
 use proc_macro2::{Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
 use syn::Lit;
 
 impl Property {
-    /// Parses the body of a `description` attribute into a [`Property`]
+    /// Parses the body of a `description` attribute into a [`Description`]
     ///
     /// Inputs the `body` of a `#[doom(description(body))]` attribute. Expects
     /// `body` to be feedable into [`format!`], i.e., a format string literal
-    /// followed by zero or more arguments to format. Returns a
-    /// [`Property::StaticDescription`] or a [`Property::OwnedDescription`].
-    pub(in crate::doom::property) fn parse_description(body: Group) -> Property {
+    /// followed by zero or more arguments to format. Returns a [`Description`].
+    pub(in crate::doom::property) fn parse_description(body: Group) -> Description {
         let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
 
         // `body` must contain at least one format `LitStr`
@@ -53,7 +52,7 @@ impl Property {
         };
 
         // Determine if `format` formats variables: if so, the
-        // description is owned, otherwise it is static
+        // `Description` is `Owned`, otherwise it is `Static`
 
         // `format` formats variables if and only if it contains
         // single brackets ('{') (double brackets ("{{") are an
@@ -71,7 +70,7 @@ impl Property {
             // will result in a meaningful error, referencing the
             // correct `Span`s of `format` and `tokens`
 
-            Property::OwnedDescription {
+            Description::Owned {
                 format,
                 arguments: tokens,
             }
@@ -89,7 +88,7 @@ impl Property {
                 .abort();
             }
 
-            Property::StaticDescription {
+            Description::Static {
                 description: format,
             }
         }
