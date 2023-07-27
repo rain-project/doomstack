@@ -4,9 +4,12 @@ mod description;
 mod property;
 mod wrap;
 
+use description::Description;
+use property::Property;
+use wrap::Wrap;
+
 // Interface
 
-use crate::doom::property::Property;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{Data, DeriveInput};
