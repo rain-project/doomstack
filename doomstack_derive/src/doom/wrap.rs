@@ -2,5 +2,5 @@ use proc_macro2::Ident;
 
 #[allow(dead_code)]
 pub(crate) struct Wrap {
-    constructor: Ident,
+    pub constructor: Ident,
 }
