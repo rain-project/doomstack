@@ -1,6 +1,7 @@
 // Modules
 
 mod description;
+mod messages;
 mod property;
 mod wrap;
 

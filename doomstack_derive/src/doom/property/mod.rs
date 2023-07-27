@@ -1,5 +1,5 @@
 use crate::doom::{
-    property::messages::{errors::*, helps::*},
+    messages::{errors::*, helps::*},
     Description, Wrap,
 };
 use proc_macro_error::{Diagnostic, Level};
@@ -27,7 +27,6 @@ impl Property {
     }
 }
 
-mod messages;
 mod parse_description;
 mod parse_parts;
 mod parse_wrap;

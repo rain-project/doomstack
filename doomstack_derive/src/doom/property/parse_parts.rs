@@ -1,5 +1,5 @@
 use crate::doom::{
-    property::messages::{errors::*, helps::*},
+    messages::{errors::*, helps::*},
     Property,
 };
 use proc_macro2::{Delimiter, Group, TokenTree};
