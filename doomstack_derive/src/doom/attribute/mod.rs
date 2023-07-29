@@ -7,12 +7,12 @@ use proc_macro_error::{Diagnostic, Level};
 
 #[allow(dead_code)]
 pub(crate) struct Attribute {
-    spans: Spans,
-    setting: Setting,
+    pub spans: Spans,
+    pub setting: Setting,
 }
 
 pub(crate) struct Spans {
-    kind: Span,
+    pub kind: Span,
 }
 
 impl Attribute {
