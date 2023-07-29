@@ -1,20 +1,22 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Property,
+    Attribute,
 };
 use proc_macro2::{Delimiter, Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
-use syn::{Attribute, Ident, Meta};
+use syn::{Ident, Meta};
 
-impl Property {
-    /// Parses an [`Attribute`] to extract a [`Property`]'s kind and body.
+impl Attribute {
+    /// Parses a [`syn::Attribute`] to extract an [`Attribute`]'s kind and body.
     ///
     /// Returns `Some((kind, body))` if `attribute` is in the form ```#[doom(kind(body))]```,
     /// where `kind` is an [`Ident`] and `body` is a  sequence of [`TokenTree`]s; returns
     /// `None` otherwise.
     ///
     /// [`Ident`]: struct@syn::Ident
-    pub(in crate::doom::property) fn parse_parts(attribute: &Attribute) -> Option<(Ident, Group)> {
+    pub(in crate::doom::attribute) fn parse_parts(
+        attribute: &syn::Attribute,
+    ) -> Option<(Ident, Group)> {
         // Return `None` if `attribute` is not in the form `#[doom(...)]`
 
         let Meta::List(meta) = &attribute.meta else {

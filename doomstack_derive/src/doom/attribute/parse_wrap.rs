@@ -1,16 +1,16 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Property, Wrap,
+    Attribute, Wrap,
 };
 use proc_macro2::{Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
 
-impl Property {
+impl Attribute {
     /// Parses the body of a `wrap` attribute into a [`Wrap`]
     ///
     /// Inputs the `body` of a `#[doom(wrap(body))]` attribute. Expects `body`
     /// to be an [`Ident`] (of a wrapping constructor). Returns a [`Wrap`].
-    pub(in crate::doom::property) fn parse_wrap(body: Group) -> Wrap {
+    pub(in crate::doom::attribute) fn parse_wrap(body: Group) -> Wrap {
         let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
 
         // `body` must contain exactly one `Ident`

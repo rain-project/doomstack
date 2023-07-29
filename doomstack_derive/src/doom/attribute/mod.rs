@@ -3,27 +3,26 @@ use crate::doom::{
     Description, Wrap,
 };
 use proc_macro_error::{Diagnostic, Level};
-use syn::Attribute;
 
 #[allow(dead_code)]
-pub(crate) enum Property {
+pub(crate) enum Attribute {
     Description(Description),
     Wrap(Wrap),
 }
 
-impl Property {
-    pub fn parse(attribute: &Attribute) -> Option<Self> {
-        let (kind, body) = Property::parse_parts(attribute)?;
+impl Attribute {
+    pub fn parse(attribute: &syn::Attribute) -> Option<Self> {
+        let (kind, body) = Attribute::parse_parts(attribute)?;
 
-        let property = match kind.to_string().as_str() {
-            "description" => Property::Description(Property::parse_description(body)),
-            "wrap" => Property::Wrap(Property::parse_wrap(body)),
+        let attribute = match kind.to_string().as_str() {
+            "description" => Attribute::Description(Attribute::parse_description(body)),
+            "wrap" => Attribute::Wrap(Attribute::parse_wrap(body)),
             _ => Diagnostic::spanned(kind.span(), Level::Error, UNEXPECTED_KIND.to_string())
                 .help(AVAILABLE_KINDS.to_string())
                 .abort(),
         };
 
-        Some(property)
+        Some(attribute)
     }
 }
 

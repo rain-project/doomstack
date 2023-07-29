@@ -1,18 +1,18 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Description, Property,
+    Attribute, Description,
 };
 use proc_macro2::{Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
 use syn::Lit;
 
-impl Property {
+impl Attribute {
     /// Parses the body of a `description` attribute into a [`Description`]
     ///
     /// Inputs the `body` of a `#[doom(description(body))]` attribute. Expects
     /// `body` to be feedable into [`format!`], i.e., a format string literal
     /// followed by zero or more arguments to format. Returns a [`Description`].
-    pub(in crate::doom::property) fn parse_description(body: Group) -> Description {
+    pub(in crate::doom::attribute) fn parse_description(body: Group) -> Description {
         let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
 
         // `body` must contain at least one format `LitStr`

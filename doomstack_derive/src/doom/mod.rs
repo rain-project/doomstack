@@ -1,12 +1,12 @@
 // Modules
 
+mod attribute;
 mod description;
 mod messages;
-mod property;
 mod wrap;
 
+use attribute::Attribute;
 use description::Description;
-use property::Property;
 use wrap::Wrap;
 
 // Interface
@@ -21,7 +21,7 @@ pub(crate) fn doom(input: TokenStream) -> TokenStream {
     let Data::Enum(mut data) = derive_input.data else { todo!() };
 
     let variant = data.variants[0].attrs.remove(0);
-    let _property = Property::parse(&variant);
+    let _property = Attribute::parse(&variant);
 
     quote!().into()
 }
