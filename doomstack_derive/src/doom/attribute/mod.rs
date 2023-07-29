@@ -2,16 +2,24 @@ use crate::doom::{
     messages::{errors::*, helps::*},
     Setting,
 };
+use proc_macro2::Span;
 use proc_macro_error::{Diagnostic, Level};
 
 #[allow(dead_code)]
 pub(crate) struct Attribute {
+    spans: Spans,
     setting: Setting,
+}
+
+pub(crate) struct Spans {
+    kind: Span,
 }
 
 impl Attribute {
     pub fn parse(attribute: &syn::Attribute) -> Option<Self> {
         let (kind, body) = Attribute::parse_parts(attribute)?;
+
+        let spans = Spans { kind: kind.span() };
 
         let setting = match kind.to_string().as_str() {
             "description" => Setting::Description(Attribute::parse_description(body)),
@@ -21,7 +29,7 @@ impl Attribute {
                 .abort(),
         };
 
-        Some(Attribute { setting })
+        Some(Attribute { spans, setting })
     }
 }
 
