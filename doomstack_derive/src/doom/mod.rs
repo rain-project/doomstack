@@ -4,11 +4,13 @@ mod attribute;
 mod description;
 mod messages;
 mod setting;
+mod settings;
 mod wrap;
 
 use attribute::Attribute;
 use description::Description;
 use setting::Setting;
+use settings::Settings;
 use wrap::Wrap;
 
 // Interface

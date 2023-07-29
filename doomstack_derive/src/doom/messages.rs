@@ -8,6 +8,9 @@ pub(in crate::doom) mod errors {
     pub const MISSING_DESCRIPTION_FORMAT: &str = "missing format string in `description()` attribute";
     pub const UNEXPECTED_DESCRIPTION_TOKEN: &str = "unexpected token in `description()` attribute";
     pub const UNEXPECTED_DESCRIPTION_ARGUMENTS: &str = "unexpected arguments in `description(format, ...)` attribute: `format` does not format any variable";
+    pub const MULTIPLE_DESCRIPTIONS: &str = "multiple `description()` attributes for the same item";
+    pub const MULTIPLE_WRAPS: &str = "multiple `wrap()` attributes for the same item";
+    pub const MISSING_DESCRIPTION: &str = "missing `description()` attribute";
 }
 
 #[rustfmt::skip]
@@ -29,4 +32,10 @@ pub(in crate::doom) mod helps {
           struct MyError {
               severity: u32,
           }"#;
+
+    pub const SINGLE_DESCRIPTION: &str = 
+          r#"each item (`struct` or `enum` variant) must have exactly one `description()` attribute"#;
+
+    pub const OPTIONAL_WRAP: &str = 
+          r#"each item (`struct` or `enum` variant) must have at most one `wrap()` attribute"#;
 }
