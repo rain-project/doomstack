@@ -3,10 +3,12 @@
 mod attribute;
 mod description;
 mod messages;
+mod setting;
 mod wrap;
 
 use attribute::Attribute;
 use description::Description;
+use setting::Setting;
 use wrap::Wrap;
 
 // Interface
