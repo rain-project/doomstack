@@ -17,7 +17,7 @@ struct Collector {
 }
 
 impl Settings {
-    fn from_attributes<A>(attributes: A, item_span: Span) -> Self
+    pub fn from_attributes<A>(attributes: A, item_span: Span) -> Self
     where
         A: IntoIterator<Item = Attribute>,
     {
