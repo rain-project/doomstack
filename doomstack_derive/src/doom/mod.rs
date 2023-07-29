@@ -22,10 +22,11 @@ use syn::{Data, DeriveInput};
 pub(crate) fn doom(input: TokenStream) -> TokenStream {
     let derive_input: DeriveInput = syn::parse(input).unwrap();
 
-    let Data::Enum(mut data) = derive_input.data else { todo!() };
+    let Data::Enum(data) = derive_input.data else { todo!() };
+    let variant = &data.variants[0];
 
-    let variant = data.variants[0].attrs.remove(0);
-    let _property = Attribute::parse(&variant);
+    let attributes = variant.attrs.iter().filter_map(Attribute::parse);
+    let _settings = Settings::from_attributes(attributes, variant.ident.span());
 
     quote!().into()
 }
