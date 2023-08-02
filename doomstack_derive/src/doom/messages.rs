@@ -11,6 +11,7 @@ pub(in crate::doom) mod errors {
     pub const MULTIPLE_DESCRIPTIONS: &str = "multiple `description()` attributes for the same item";
     pub const MULTIPLE_WRAPS: &str = "multiple `wrap()` attributes for the same item";
     pub const MISSING_DESCRIPTION: &str = "missing `description()` attribute";
+    pub const UNION_UNDERIVABLE: &str = "deriving `Doom` for a `union` type";
 }
 
 #[rustfmt::skip]
@@ -38,4 +39,7 @@ pub(in crate::doom) mod helps {
 
     pub const OPTIONAL_WRAP: &str = 
           r#"each item (`struct` or `enum` variant) must have at most one `wrap()` attribute"#;
+
+    pub const DERIVABLES: &str = 
+          r#"`Doom` can only be derived for `struct` or `enum` types"#;
 }

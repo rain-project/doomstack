@@ -1,5 +1,9 @@
-use crate::doom::{Attribute, Fields, Settings};
+use crate::doom::{
+    messages::{errors::*, helps::*},
+    Attribute, Fields, Settings,
+};
 use proc_macro2::Ident;
+use proc_macro_error::{Diagnostic, Level};
 use syn::{Data, DeriveInput};
 
 pub(crate) enum Derive {
@@ -61,7 +65,15 @@ impl Derive {
                 }
             }
 
-            _ => todo!(),
+            Data::Union(data) => {
+                Diagnostic::spanned(
+                    data.union_token.span,
+                    Level::Error,
+                    UNION_UNDERIVABLE.to_string(),
+                )
+                .help(DERIVABLES.to_string())
+                .abort();
+            }
         }
     }
 }
