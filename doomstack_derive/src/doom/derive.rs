@@ -1,10 +1,11 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Attribute, Fields, Settings,
+    Attribute, Description, Fields, Settings,
 };
-use proc_macro2::Ident;
+use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::{Diagnostic, Level};
-use syn::{Data, DeriveInput};
+use quote::quote;
+use syn::{Data, DeriveInput, Index};
 
 pub(crate) enum Derive {
     Struct {
@@ -73,6 +74,76 @@ impl Derive {
                 )
                 .help(DERIVABLES.to_string())
                 .abort();
+            }
+        }
+    }
+
+    pub fn derive(&self) -> TokenStream {
+        match self {
+            Derive::Struct {
+                identifier,
+                settings,
+                fields,
+            } => {
+                let tag = quote! {
+                    fn tag(&self) -> &'static str {
+                        stringify!(#identifier)
+                    }
+                };
+
+                let binds = match fields {
+                    Fields::Named(fields) => fields
+                        .iter()
+                        .map(|(_, identifier)| quote!(let #identifier = self.#identifier;))
+                        .collect(),
+
+                    Fields::Unnamed(types) => (0..types.len() as u32)
+                        .into_iter()
+                        .map(|index| {
+                            (
+                                Ident::new(format!("_{index}",).as_str(), Span::call_site()),
+                                index,
+                            )
+                        })
+                        .map(|(bind, index)| {
+                            let index = Index {
+                                index,
+                                span: Span::call_site(),
+                            };
+
+                            quote!(let #bind = self.#index;)
+                        })
+                        .collect(),
+
+                    Fields::Unit => Vec::new(),
+                };
+
+                let format = match &settings.description {
+                    Description::Static { description } => {
+                        quote!(doomstack::Description::Static(#description))
+                    }
+                    Description::Owned { format, arguments } => quote!(
+                        doomstack::Description::Owned(format!(#format, #(#arguments),*))
+                    ),
+                };
+
+                let description = quote! {
+                    fn description(&self) -> doomstack::Description {
+                        #(#binds)*
+                        #format
+                    }
+                };
+
+                quote! {
+                    impl doomstack::Doom for #identifier {
+                        #tag
+                        #description
+                    }
+                }
+            }
+
+            Derive::Enum { .. } => {
+                todo!()
             }
         }
     }

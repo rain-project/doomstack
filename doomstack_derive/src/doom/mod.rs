@@ -20,12 +20,11 @@ use wrap::Wrap;
 // Interface
 
 use proc_macro::TokenStream;
-use quote::quote;
-use syn::{Data, DeriveInput};
+use syn::DeriveInput;
 
 pub(crate) fn doom(input: TokenStream) -> TokenStream {
     let input: DeriveInput = syn::parse(input).unwrap();
     let derive = Derive::parse(&input);
 
-    quote!().into()
+    derive.derive().into()
 }
