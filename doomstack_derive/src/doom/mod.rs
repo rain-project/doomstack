@@ -1,6 +1,7 @@
 // Modules
 
 mod attribute;
+mod derive;
 mod description;
 mod fields;
 mod messages;
@@ -9,6 +10,7 @@ mod settings;
 mod wrap;
 
 use attribute::Attribute;
+use derive::Derive;
 use description::Description;
 use fields::Fields;
 use setting::Setting;
