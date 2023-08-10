@@ -18,24 +18,19 @@ impl Derive {
         let binds = match fields {
             Fields::Named(fields) => fields
                 .iter()
-                .map(|(_, identifier)| quote!(let #identifier = self.#identifier;))
+                .map(|(_, identifier)| quote!(let #identifier = &self.#identifier;))
                 .collect(),
 
             Fields::Unnamed(types) => (0..types.len() as u32)
                 .into_iter()
                 .map(|index| {
-                    (
-                        Ident::new(format!("_{index}",).as_str(), Span::call_site()),
-                        index,
-                    )
-                })
-                .map(|(bind, index)| {
+                    let bind = Ident::new(format!("_{index}",).as_str(), Span::call_site());
                     let index = Index {
                         index,
                         span: Span::call_site(),
                     };
 
-                    quote!(let #bind = self.#index;)
+                    quote!(let #bind = &self.#index;)
                 })
                 .collect(),
 
