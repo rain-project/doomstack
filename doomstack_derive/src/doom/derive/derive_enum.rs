@@ -1,4 +1,4 @@
-use crate::doom::{derive::Variant, Derive};
+use crate::doom::{derive::Variant, Derive, Description, Fields};
 use proc_macro2::{Ident, Span, TokenStream};
 use quote::quote;
 use syn::LitStr;
@@ -28,9 +28,44 @@ impl Derive {
             }
         };
 
+        let description_branches = variants.iter().map(|variant| {
+            let variant_identifier = &variant.identifier;
+
+            let fields = match &variant.fields {
+                Fields::Named(fields) => {
+                    let fields = fields.iter().map(|(_, identifier)| identifier);
+                    quote!({#(#fields),*})
+                }
+                Fields::Unnamed(fields) => {
+                    let fields = (0..fields.len())
+                        .map(|index| Ident::new(format!("_{index}",).as_str(), Span::call_site()));
+
+                    quote!((#(#fields),*))
+                }
+                Fields::Unit => quote!(),
+            };
+
+            let format = match &variant.settings.description {
+                Description::Static { description } => {
+                    quote!(doomstack::Description::Static(#description))
+                }
+                Description::Owned { format, arguments } => quote!(doomstack::Description::Owned(
+                    format!(#format, #(#arguments),*)
+                )),
+            };
+
+            quote! {
+                #identifier::#variant_identifier #fields => {
+                    #format
+                }
+            }
+        });
+
         let description = quote! {
             fn description(&self) -> doomstack::Description {
-                todo!()
+                match self {
+                    #(#description_branches)*
+                }
             }
         };
 
