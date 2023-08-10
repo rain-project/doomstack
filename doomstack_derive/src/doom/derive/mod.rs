@@ -1,6 +1,6 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Attribute, Description, Fields, Settings,
+    Description, Fields, Settings,
 };
 use proc_macro2::{Ident, Span, TokenStream};
 use proc_macro_error::{Diagnostic, Level};
@@ -30,41 +30,8 @@ impl Derive {
         let identifier = input.ident.clone();
 
         match &input.data {
-            Data::Struct(data) => {
-                let attributes = input.attrs.iter().filter_map(Attribute::parse);
-                let settings = Settings::from_attributes(attributes, identifier.span());
-                let fields = Fields::parse(&data.fields);
-
-                Derive::Struct {
-                    identifier,
-                    settings,
-                    fields,
-                }
-            }
-
-            Data::Enum(data) => {
-                let variants = data
-                    .variants
-                    .iter()
-                    .map(|variant| {
-                        let identifier = variant.ident.clone();
-                        let attributes = variant.attrs.iter().filter_map(Attribute::parse);
-                        let settings = Settings::from_attributes(attributes, identifier.span());
-                        let fields = Fields::parse(&variant.fields);
-
-                        Variant {
-                            identifier,
-                            settings,
-                            fields,
-                        }
-                    })
-                    .collect();
-
-                Derive::Enum {
-                    identifier,
-                    variants,
-                }
-            }
+            Data::Struct(data) => Derive::parse_struct(identifier, input, data),
+            Data::Enum(data) => Derive::parse_enum(identifier, data),
 
             Data::Union(data) => {
                 Diagnostic::spanned(
@@ -148,3 +115,6 @@ impl Derive {
         }
     }
 }
+
+mod parse_enum;
+mod parse_struct;
