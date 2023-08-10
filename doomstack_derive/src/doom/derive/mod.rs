@@ -52,13 +52,15 @@ impl Derive {
                 fields,
             } => Derive::derive_struct(identifier, settings, fields),
 
-            Derive::Enum { .. } => {
-                todo!()
-            }
+            Derive::Enum {
+                identifier,
+                variants,
+            } => Derive::derive_enum(identifier, variants),
         }
     }
 }
 
+mod derive_enum;
 mod derive_struct;
 mod parse_enum;
 mod parse_struct;
