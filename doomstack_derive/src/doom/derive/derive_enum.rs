@@ -31,17 +31,19 @@ impl Derive {
         let description_branches = variants.iter().map(|variant| {
             let variant_identifier = &variant.identifier;
 
-            let fields = match &variant.fields {
+            let bind = match &variant.fields {
                 Fields::Named(fields) => {
                     let fields = fields.iter().map(|(_, identifier)| identifier);
                     quote!({#(#fields),*})
                 }
+
                 Fields::Unnamed(fields) => {
                     let fields = (0..fields.len())
                         .map(|index| Ident::new(format!("_{index}",).as_str(), Span::call_site()));
 
                     quote!((#(#fields),*))
                 }
+
                 Fields::Unit => quote!(),
             };
 
@@ -55,7 +57,7 @@ impl Derive {
             };
 
             quote! {
-                #identifier::#variant_identifier #fields => {
+                #identifier::#variant_identifier #bind => {
                     #format
                 }
             }
