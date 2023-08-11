@@ -62,5 +62,6 @@ impl Derive {
 
 mod derive_enum;
 mod derive_struct;
+mod derive_wrap;
 mod parse_enum;
 mod parse_struct;
