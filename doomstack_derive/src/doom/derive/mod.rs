@@ -50,12 +50,12 @@ impl Derive {
                 identifier,
                 settings,
                 fields,
-            } => Derive::derive_struct(identifier, settings, fields),
+            } => Derive::derive_struct_doom(identifier, settings, fields),
 
             Derive::Enum {
                 identifier,
                 variants,
-            } => Derive::derive_enum(identifier, variants),
+            } => Derive::derive_enum_doom(identifier, variants),
         }
     }
 }

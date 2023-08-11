@@ -4,7 +4,7 @@ use quote::quote;
 use syn::LitStr;
 
 impl Derive {
-    pub(in crate::doom::derive) fn derive_enum(
+    pub(in crate::doom::derive) fn derive_enum_doom(
         identifier: &Ident,
         variants: &[Variant],
     ) -> TokenStream {

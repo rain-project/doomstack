@@ -4,7 +4,7 @@ use quote::quote;
 use syn::Index;
 
 impl Derive {
-    pub(in crate::doom::derive) fn derive_struct(
+    pub(in crate::doom::derive) fn derive_struct_doom(
         identifier: &Ident,
         settings: &Settings,
         fields: &Fields,
