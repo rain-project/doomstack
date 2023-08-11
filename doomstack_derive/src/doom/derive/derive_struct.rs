@@ -60,4 +60,16 @@ impl Derive {
             }
         }
     }
+
+    pub(in crate::doom::derive) fn derive_struct_wraps(
+        identifier: &Ident,
+        settings: &Settings,
+        fields: &Fields,
+    ) -> Vec<TokenStream> {
+        settings
+            .wrap
+            .iter()
+            .map(|wrap| Derive::derive_wrap(identifier, None, &wrap.constructor, fields))
+            .collect()
+    }
 }

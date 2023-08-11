@@ -78,4 +78,25 @@ impl Derive {
             }
         }
     }
+
+    pub(in crate::doom::derive) fn derive_enum_wraps(
+        identifier: &Ident,
+        variants: &[Variant],
+    ) -> Vec<TokenStream> {
+        variants
+            .iter()
+            .filter_map(|variant| {
+                let Some(wrap) = &variant.settings.wrap else {
+                    return None;
+                };
+
+                Some(Derive::derive_wrap(
+                    identifier,
+                    Some(&variant.identifier),
+                    &wrap.constructor,
+                    &variant.fields,
+                ))
+            })
+            .collect()
+    }
 }
