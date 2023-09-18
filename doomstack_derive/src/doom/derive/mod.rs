@@ -4,6 +4,7 @@ use crate::doom::{
 };
 use proc_macro2::{Ident, TokenStream};
 use proc_macro_error::{Diagnostic, Level};
+use quote::quote;
 use syn::{Data, DeriveInput};
 
 pub(crate) enum Derive {
@@ -50,12 +51,28 @@ impl Derive {
                 identifier,
                 settings,
                 fields,
-            } => Derive::derive_struct_doom(identifier, settings, fields),
+            } => {
+                let doom = Derive::derive_struct_doom(identifier, settings, fields);
+                let wraps = Derive::derive_struct_wraps(identifier, settings, fields);
+
+                quote! {
+                    #doom
+                    #(#wraps)*
+                }
+            }
 
             Derive::Enum {
                 identifier,
                 variants,
-            } => Derive::derive_enum_doom(identifier, variants),
+            } => {
+                let doom = Derive::derive_enum_doom(identifier, variants);
+                let wraps = Derive::derive_enum_wraps(identifier, variants);
+
+                quote! {
+                    #doom
+                    #(#wraps)*
+                }
+            }
         }
     }
 }
