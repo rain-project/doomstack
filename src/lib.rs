@@ -267,3 +267,35 @@ pub use location::Location;
 pub use result_ext::ResultExt;
 pub use stack::Stack;
 pub use top::Top;
+
+pub use doomstack_derive::Doom;
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate as doomstack;
+
+    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Doom)]
+    #[doom(description("Unit `struct` error."))]
+    #[doom(wrap(unit_struct_error))]
+    struct UnitStructError;
+
+    #[test]
+    fn unit_struct_error() {
+        assert_eq!(UnitStructError::unit_struct_error(()), UnitStructError);
+        assert_eq!(UnitStructError::unit_struct_error(42u32), UnitStructError);
+        assert_eq!(UnitStructError::unit_struct_error((1u32, 2u64, "string")), UnitStructError);
+    }
+
+    #[derive(Debug, PartialEq, Eq)]
+    #[derive(Doom)]
+    #[doom(description("Single-item tuple-like `struct` error."))]
+    #[doom(wrap(single_item_tuple_struct_error))]
+    struct SingleItemTupleStructError(u32);
+
+    #[test]
+    fn single_item_tuple_struct_error() {
+        assert_eq!(SingleItemTupleStructError::single_item_tuple_struct_error(42), SingleItemTupleStructError(42));
+    }
+}
