@@ -275,8 +275,7 @@ mod tests {
     use super::*;
     use crate as doomstack;
 
-    #[derive(Debug, PartialEq, Eq)]
-    #[derive(Doom)]
+    #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Unit `struct` error."))]
     #[doom(wrap(unit_struct_error))]
     struct UnitStructError;
@@ -285,17 +284,93 @@ mod tests {
     fn unit_struct_error() {
         assert_eq!(UnitStructError::unit_struct_error(()), UnitStructError);
         assert_eq!(UnitStructError::unit_struct_error(42u32), UnitStructError);
-        assert_eq!(UnitStructError::unit_struct_error((1u32, 2u64, "string")), UnitStructError);
+
+        assert_eq!(
+            UnitStructError::unit_struct_error((1u32, 2u64, "string")),
+            UnitStructError
+        );
     }
 
-    #[derive(Debug, PartialEq, Eq)]
-    #[derive(Doom)]
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    #[doom(description("Empty tuple-like `struct` error."))]
+    #[doom(wrap(empty_tuple_struct_error))]
+    struct EmptyTupleStructError();
+
+    #[test]
+    fn empty_tuple_struct_error() {
+        assert_eq!(
+            EmptyTupleStructError::empty_tuple_struct_error(()),
+            EmptyTupleStructError()
+        );
+    }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Single-item tuple-like `struct` error."))]
     #[doom(wrap(single_item_tuple_struct_error))]
     struct SingleItemTupleStructError(u32);
 
     #[test]
     fn single_item_tuple_struct_error() {
-        assert_eq!(SingleItemTupleStructError::single_item_tuple_struct_error(42), SingleItemTupleStructError(42));
+        assert_eq!(
+            SingleItemTupleStructError::single_item_tuple_struct_error(42),
+            SingleItemTupleStructError(42)
+        );
+    }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    #[doom(description("Multiple-item tuple-like `struct` error."))]
+    #[doom(wrap(multiple_item_tuple_struct_error))]
+    struct MultipleItemTupleStructError(u32, u64);
+
+    #[test]
+    fn multiple_item_tuple_struct_error() {
+        assert_eq!(
+            MultipleItemTupleStructError::multiple_item_tuple_struct_error((42, 84)),
+            MultipleItemTupleStructError(42, 84)
+        );
+    }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    #[doom(description("Empty C-style `struct` error."))]
+    #[doom(wrap(empty_c_struct_error))]
+    struct EmptyCStructError {}
+
+    #[test]
+    fn empty_c_struct_error() {
+        assert_eq!(
+            EmptyCStructError::empty_c_struct_error(()),
+            EmptyCStructError {}
+        );
+    }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    #[doom(description("Single-item C-style `struct` error."))]
+    #[doom(wrap(single_item_c_struct_error))]
+    struct SingleItemCStructError {
+        _x: u32,
+    }
+
+    #[test]
+    fn single_item_c_struct_error() {
+        assert_eq!(
+            SingleItemCStructError::single_item_c_struct_error(42),
+            SingleItemCStructError { _x: 42 }
+        );
+    }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    #[doom(description("Multiple-item C-style `struct` error."))]
+    #[doom(wrap(multiple_item_c_struct_error))]
+    struct MultipleItemCStructError {
+        _x: u32,
+        _y: u64,
+    }
+
+    #[test]
+    fn multiple_item_c_struct_error() {
+        assert_eq!(
+            MultipleItemCStructError::multiple_item_c_struct_error((42, 84)),
+            MultipleItemCStructError { _x: 42, _y: 84 }
+        );
     }
 }
