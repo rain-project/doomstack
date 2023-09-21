@@ -373,4 +373,67 @@ mod tests {
             MultipleItemCStructError { _x: 42, _y: 84 }
         );
     }
+
+    #[derive(Debug, PartialEq, Eq, Doom)]
+    enum EnumError {
+        #[doom(description("Unit variant."))]
+        #[doom(wrap(unit_variant))]
+        UnitVariant,
+        #[doom(description("Empty tuple-like variant."))]
+        #[doom(wrap(empty_tuple_variant))]
+        EmptyTupleVariant(),
+        #[doom(description("Single-item tuple-like variant."))]
+        #[doom(wrap(single_item_tuple_variant))]
+        SingleItemTupleVariant(u32),
+        #[doom(description("Multiple-item tuple-like variant."))]
+        #[doom(wrap(multiple_item_tuple_variant))]
+        MultipleItemTupleVariant(u32, u64),
+        #[doom(description("Empty C-style variant."))]
+        #[doom(wrap(empty_c_variant))]
+        EmptyCVariant {},
+        #[doom(description("Single-item C-style variant."))]
+        #[doom(wrap(single_item_c_variant))]
+        SingleItemCVariant { _x: u32 },
+        #[doom(description("Multiple-item C-style variant."))]
+        #[doom(wrap(multiple_item_c_variant))]
+        MultipleItemCVariant { _x: u32, _y: u32 },
+    }
+
+    #[test]
+    fn enum_error() {
+        assert_eq!(EnumError::unit_variant(()), EnumError::UnitVariant);
+        assert_eq!(EnumError::unit_variant(42u32), EnumError::UnitVariant);
+
+        assert_eq!(
+            EnumError::unit_variant((1u32, 2u64, "string")),
+            EnumError::UnitVariant
+        );
+
+        assert_eq!(
+            EnumError::empty_tuple_variant(()),
+            EnumError::EmptyTupleVariant()
+        );
+
+        assert_eq!(
+            EnumError::single_item_tuple_variant(42),
+            EnumError::SingleItemTupleVariant(42)
+        );
+
+        assert_eq!(
+            EnumError::multiple_item_tuple_variant((42, 84)),
+            EnumError::MultipleItemTupleVariant(42, 84)
+        );
+
+        assert_eq!(EnumError::empty_c_variant(()), EnumError::EmptyCVariant {});
+
+        assert_eq!(
+            EnumError::single_item_c_variant(42),
+            EnumError::SingleItemCVariant { _x: 42 }
+        );
+
+        assert_eq!(
+            EnumError::multiple_item_c_variant((42, 84)),
+            EnumError::MultipleItemCVariant { _x: 42, _y: 84 }
+        );
+    }
 }
