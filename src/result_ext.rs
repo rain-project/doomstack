@@ -14,6 +14,16 @@ pub trait ResultExt<O, E> {
     where
         Self: DoomResult<O>,
         D: Doom;
+
+    fn wrap<W, D>(self, wrap: W) -> Result<O, Top<D>>
+    where
+        W: Fn(E) -> D,
+        D: Doom;
+
+    fn wrot<W, D>(self, wrap: W, location: Location) -> Result<O, Top<D>>
+    where
+        W: Fn(E) -> D,
+        D: Doom;
 }
 
 impl<O, E> ResultExt<O, E> for Result<O, E> {
@@ -38,5 +48,21 @@ impl<O, E> ResultExt<O, E> for Result<O, E> {
         D: Doom,
     {
         ResultExt::spot(ResultExt::push(self, doom), location)
+    }
+
+    fn wrap<W, D>(self, wrap: W) -> Result<O, Top<D>>
+    where
+        W: Fn(E) -> D,
+        D: Doom,
+    {
+        self.map_err(|error| wrap(error).into_top())
+    }
+
+    fn wrot<W, D>(self, wrap: W, location: Location) -> Result<O, Top<D>>
+    where
+        W: Fn(E) -> D,
+        D: Doom,
+    {
+        ResultExt::spot(ResultExt::wrap(self, wrap), location)
     }
 }
