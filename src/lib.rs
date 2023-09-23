@@ -253,12 +253,15 @@
 
 mod description;
 mod doom;
+mod doom_result;
 mod entry;
 mod here;
 mod location;
 mod result_ext;
 mod stack;
 mod top;
+
+use doom_result::DoomResult;
 
 pub use description::Description;
 pub use doom::Doom;
