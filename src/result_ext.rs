@@ -1,6 +1,6 @@
 use crate::{Doom, DoomResult, Location, Top};
 
-pub trait ResultExt<O> {
+pub trait ResultExt<O, E> {
     fn push<D>(self, doom: D) -> Result<O, Top<D>>
     where
         Self: DoomResult<O>,
@@ -16,7 +16,7 @@ pub trait ResultExt<O> {
         D: Doom;
 }
 
-impl<O, E> ResultExt<O> for Result<O, E> {
+impl<O, E> ResultExt<O, E> for Result<O, E> {
     fn push<D>(self, doom: D) -> Result<O, Top<D>>
     where
         Self: DoomResult<O>,
