@@ -2,6 +2,210 @@
 //!
 //! Doomstack is a library to easily and efficiently track error propagation in Rust.
 //!
+//! # Quick-start example
+//!
+//! #### Snippet
+//!
+//! ```
+//! use doomstack::{here, Doom, ResultExt, Top};
+//!
+//! #[derive(Doom)]
+//! enum IrrigationError {
+//!     #[doom(description("Faucet broken."))]
+//!     FaucetBroken,
+//!     #[doom(description("Forgot to water for {days} days."))]
+//!     ForgotToWater { days: u32 },
+//! }
+//!
+//! fn water_plants(faucet_works: bool, last_watered: u32) -> Result<(), Top<IrrigationError>> {
+//!     if !faucet_works {
+//!         return IrrigationError::FaucetBroken.fot(here!());
+//!     }
+//!
+//!     if last_watered > 2 {
+//!         return IrrigationError::ForgotToWater { days: last_watered }.fot(here!());
+//!     }
+//!
+//!     Ok(())
+//! }
+//!
+//! #[derive(Doom)]
+//! enum GardeningError {
+//!     #[doom(description("Not enough water."))]
+//!     NotEnoughWater,
+//!     #[doom(description("Not enough sunlight."))]
+//!     NotEnoughSunlight,
+//! }
+//!
+//! fn garden(faucet_works: bool, last_watered: u32, sunny: bool) -> Result<(), Top<GardeningError>> {
+//!    water_plants(faucet_works, last_watered).pot(GardeningError::NotEnoughWater, here!())?;
+//!
+//!    if !sunny {
+//!        return GardeningError::NotEnoughSunlight.fot(here!());
+//!    }
+//!
+//!    Ok(())
+//! }
+//!
+//! if let Err(error) = garden(true, 4, false) {
+//!     println!("{error:?}");
+//! }
+//! ```
+//!
+//! #### Output
+//!
+//! ```text
+//! [GardeningError::NotEnoughWater @ src/main.rs:32] Not enough water.
+//! [IrrigationError::ForgotToWater @ src/main.rs:17] Forgot to water for 4 days.
+//! ```
+//!
+//! (File names and line numbers might vary depending on file names and formatting.)
+//!
+//! #### Discussion
+//!
+//! ##### Two functions, two errors
+//!
+//! _Very_ broadly speaking, to `garden()` our garden we first `water_plants()`, then
+//! hope for the day to be `sunny`! If something goes wrong, we want to clearly see
+//! what happened. To achieve this, we define two errors: `IrrigationError`, pertaining
+//! to `water_plants()`, and `GardeningError`, pertaining to `garden()`:
+//!
+//!  - `IrrigationError` has two variants: `FaucetBroken` means that, well, our water
+//!    faucet is broken; `ForgotToWater` means that we forgot to water our plants for
+//!    a while (the `days` field tells us how long).
+//!  - `GardeningError` also has two variants, `NotEnoughWater` and `NotEnoughSunlight`.
+//!    They mean exactly what you think they mean.
+//!
+//! To turn our errors into something [doomstack](crate) can use, we simply derive the
+//! [`Doom`] trait. For each variant, we add a short, meaningful `#[description()]`
+//! using Rust's usual [`format!`] syntax (we can reference fields directly, no need
+//! for `self` or `match`).
+//!
+//!  ##### What's the deal with [`Top`]s?
+//!
+//! You'll notice `water_plants()` and `garden()` respectively return a
+//! `Top<IrrigationError>`and a `Top<GardeningError>` as [`Err`]s. This might feel
+//! counterintuitive at first: why not use `IrrigationError` / `GardeningError` as-is?
+//! Because [doomstack](crate) organizes errors in _stacks_, allowing us to track errors
+//! as they propagate through our code. This is exactly what a `Top<E>` is, a stack
+//! of errors: root cause at the bottom, newer errors pushed on top as the stack
+//! propagates, an `E` at the very top. Whenever you come across a `Top<E>`, think:
+//!
+//! > _"An `E` just happened, possibly resulting from previous errors lower in the stack."_
+//!
+//! (The reason why `Top`s are generics is to make the top error available as-is, fully
+//! typed, with no need for dynamic dispatch. Let's not worry about this now, we'll
+//! thoroughly discuss this design choice in the [Design philosophy](#design-philosophy)
+//! section of this guide.)
+//!
+//! ##### Building our first [`Top`]s
+//!
+//! Let's start with `water_plants()`. If the faucet is broken, we must return an `Err`.
+//! This is how we do it:
+//! ```
+//! # use doomstack::{here, Doom, ResultExt, Top};
+//! #
+//! # #[derive(Doom)]
+//! # enum IrrigationError {
+//! #     #[doom(description("Faucet broken."))]
+//! #     FaucetBroken,
+//! #     #[doom(description("Forgot to water for {days} days."))]
+//! #     ForgotToWater { days: u32 },
+//! # }
+//! #
+//! # fn water_plants(faucet_works: bool, last_watered: u32) -> Result<(), Top<IrrigationError>> {
+//! return IrrigationError::FaucetBroken.fot(here!());
+//! # }
+//! ```
+//! Lots to unpack here! Step by step:
+//!
+//!  - We create an `IrrigationError::FaucetBroken`, indicating that, well, our faucet
+//!    is broken. Remember that `IrrigationError` implements `Doom`. This will be useful
+//!    in the next step.
+//!  - We call `fot(here!())` on our `IrrigationError`:
+//!    * The [`here!()`] macro evaluates to the code [`Location`] (filename and line)
+//!      where [`here!()`] is invoked.
+//!    * The [`fot`] method (part of the [`Doom`] trait, syntax sugar for [`Doom::fail`],
+//!      then [`ResultExt::spot`]) pushes the `IrrigationError` on a new, otherwise empty
+//!      `Top<IrrigationError>`, labels the top error in the [`Top`] (the `IrrigationError`)
+//!      as having occurred [`here!()`], then wraps the `Top<IrrigationError>` in the [`Err`]
+//!      variant of a result.
+//!
+//! A lot is achieved in one line! We create an `IrrigationError`, we wrap it in a [`Top`],
+//! we flag it as having occurred [`here!()`], and finally we wrap the [`Top`] in an [`Err`],
+//! which we return.
+//!
+//! The drill is similar if we forgot to water our plants for more than two `days`:
+//! we create an `IrrigationError::ForgotToWater` with the appropriate number of `days`,
+//! call `pot(here!())` on it, and return the [`Result`].
+//!
+//! ##### Push and propagate!
+//!
+//! Moving on to the `garden()` function, we start by invoking `water_plants()`. Remember:
+//! this might return a `Top<IrrigationError>`! If that happens, we want to indicate that
+//! a `GardeningError::NotEnoughWater` occurred as a result of the `IrrigationError`.
+//! Again, we get everything done in just one line:
+//!
+//! ```
+//! # use doomstack::{here, Doom, ResultExt, Top};
+//! #
+//! # #[derive(Doom)]
+//! # enum IrrigationError {
+//! #     #[doom(description("Faucet broken."))]
+//! #     FaucetBroken,
+//! #     #[doom(description("Forgot to water for {days} days."))]
+//! #     ForgotToWater { days: u32 },
+//! # }
+//! #
+//! # #[derive(Doom)]
+//! # enum GardeningError {
+//! #     #[doom(description("Not enough water."))]
+//! #     NotEnoughWater,
+//! #     #[doom(description("Not enough sunlight."))]
+//! #     NotEnoughSunlight,
+//! # }
+//! #
+//! # fn water_plants(faucet_works: bool, last_watered: u32) -> Result<(), Top<IrrigationError>> {
+//! #     unimplemented!()
+//! # }
+//! #
+//! # fn garden(faucet_works: bool, last_watered: u32, sunny: bool) -> Result<(), Top<GardeningError>> {
+//! water_plants(faucet_works, last_watered).pot(GardeningError::NotEnoughWater, here!())?;
+//! #     unimplemented!()
+//! # }
+//! ```
+//! Step by step:
+//!
+//!  - We invoke `water_plants()`, thus obtaining a `Result<(), Top<IrrigationError>>`.
+//!  - We call `pot(GardeningError::NotEnoughWater, here!())` on the [`Result`]:
+//!    * As before, the [`here!()`] macro captures the current code [`Location`] to tag our
+//!      `GardeningError` with.
+//!    * The [`pot`] method (part of the [`ResultExt`] trait, syntax sugar for
+//!      [`ResultExt::push`], then [`ResultExt::spot`]) checks if the [`Result`] is an [`Err`].
+//!      If so, it pushes `GardeningError::NotEnoughWater` on the `Top<IrrigationError>`.
+//!      This produces a `Top<GardeningError>` (indicating that the  `GardeningError` is now
+//!      the top, most recent error in the stack). Finally, [`pot`] labels the top error in the
+//!      [`Top`] (the `GardeningError`) as having occurred [`here!()`].
+//!
+//! Note this is exactly what happens when we invoke
+//! ```
+//! # fn garden(faucet_works: bool, last_watered: u32, sunny: bool) {
+//! #     // ...
+//! # }
+//! #
+//! garden(true, 4, false)
+//! ```
+//!
+//! The call returns an `error` of type `Top<GardeningError>`, which stacks two errors:
+//!  - A `GardeningError::NotEnoughWater` at the top (`GardeningError` is the most recent
+//!    error);
+//!  - An `IrrigationError::ForgotToWater { days: 4 }` at the bottom (`IrrigationError`
+//!    is the root cause).
+//!
+//! When we [`println!`] `error` (see [Output](#output)), voilà, the two errors are
+//! printed out, top to bottom, each appropriately flagged by the code [`Location`]
+//! where it was generated!
+//!
 //! # Design philosophy
 //!
 //! When developing complex projects, a single error can propagate through several
@@ -250,6 +454,8 @@
 //! [`tag`]: Doom::tag
 //! [`description`]: Doom::description
 //! [`keep_original`]: Doom::keep_original
+//! [`fot`]: Doom::fot
+//! [`pot`]: ResultExt::pot
 
 mod description;
 mod doom;
