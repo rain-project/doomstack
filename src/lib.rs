@@ -218,28 +218,34 @@
 //! Broadly speaking, we can categorize two approaches to Rust error handling. The
 //! first is _typed_:
 //!
-//! ```ignore
+//! ```
+//! enum IrrigationError {
+//!     FaucetBroken,
+//!     ForgotToWater { days: u32 },
+//! }
+//!
+//! fn water_plants() -> Result<(), IrrigationError> {
+//!     // ...
+//! #   unimplemented!()
+//! }
+//!
 //! enum GardeningError {
 //!     IrrigationError(IrrigationError),
 //!     // ...
 //! }
 //!
-//! enum IrrigationError {
-//!     WaterNotFound,
-//!     PipeBroken,
-//! }
-//!
 //! impl From<IrrigationError> for GardeningError {
 //!     // Wrap `IrrigationError` in `GardeningError::IrrigationError`
+//! #
+//! #   fn from(error: IrrigationError) -> Self {
+//! #       GardeningError::IrrigationError(error)
+//! #   }
 //! }
 //!
-//! fn tend_garden() -> Result<(), GardeningError> {
+//! fn garden() -> Result<(), GardeningError> {
 //!     water_plants()?;
 //!     // ...
-//! }
-//!
-//! fn water_plants() -> Result<(), IrrigationError> {
-//!     // ...
+//! #   unimplemented!()
 //! }
 //! ```
 //!
@@ -253,27 +259,31 @@
 //!
 //! On the other end of the spectrum, we have _non-typed_ errors:
 //!
-//! ```ignore
+//! ```
+//! # use std::error::Error;
+//! #
 //! // Often like this..
 //! fn water_plants() -> Result<(), Box<dyn std::error::Error>> {
 //!     // ...
+//! #   unimplemented!()
 //! }
 //!
 //! // .. or sometimes even like this!
-//! fn water_plants() -> Result<(), String> {
+//! fn garden() -> Result<(), String> {
 //!     // ...
+//! #   unimplemented!()
 //! }
 //! ```
 //!
 //! Non-typed errors are easy to compose and make for simple, uniform method signatures,
 //! but they often come at the cost of heap allocations and dynamic dispatch. Most
-//! importantly, non-typed errors give up on Rust's powerful file system: the compiler
+//! importantly, non-typed errors give up on Rust's powerful type system: the compiler
 //! does not know anymore whether or not, for example, all possible causes of an error
 //! have been investigated.
 //!
 //! #### Doomstack's compromise
 //!
-//! Doomstack tries to offer an healthy balance between typed and non-typed errors:
+//! Doomstack tries to offer an healthy compromise between typed and non-typed errors:
 //! _the most recent error is typed, its predecessors are non-typed_. As in typed error
 //! handling, a Doomstack error is a user-defined `struct` or `enum` (implementing the
 //! [`Doom`] trait):
@@ -308,10 +318,17 @@
 //! }
 //! ```
 //!
-//!  To enable non-typed error handling, a `Doom` error can be _archived_ into a common
-//!  type, [`Entry`], which captures some of the properties of the original error (e.g.,
-//!  [`tag`] and [`description`]) along with (optionally) a `Box<dyn>`-ed copy of the
-//!  original error:
+//! (If you are worried about all the boilerplate you'll see in this section's examples,
+//! don't be! [doomstack](crate) comes packed with useful macros and shortcuts to make
+//! error handling as ergonomic and concise as possible! We keep the examples in this
+//! section shortcut-free just to help you understand how [doomstack](crate) is designed.
+//! Jump back to [Quick-start example](#quick-start-example) for a hands-on example on
+//! how to use [doomstack](crate) in practice.)
+//!
+//! To enable non-typed error handling, a `Doom` error can be [`archive`]d into a common
+//! type, [`Entry`], which captures some of the properties of the original error (e.g.,
+//! [`tag`] and [`description`]) along with (optionally) a `Box<dyn>`-ed copy of the
+//! original error:
 //!
 //! ```
 //! # use doomstack::{Description, Doom};
@@ -358,16 +375,16 @@
 //!
 //! let entry = Entry::archive(error);
 //!
-//! // `entry` has concrete type `Entry`, exposing some useful methods such as
+//! // `entry` is now an `Entry`, exposing some useful methods such as
 //! println!("{}", entry.description());
 //! // but we can no longer, e.g., get `entry.tool_involved` as a concrete `Tool`.
 //! ```
 //!
-//! (In the example above, the original `error` could be retrieved from `entry` if
-//! `GardeningError` prescribed to [`keep_original`], but let's keep our examples
-//! as simple as possible for now).
-
-//! Multiple [`Entry`]-ies can be stacked in a [`Stack`], allowing to track error
+//! (In the example above, the original, typed `error` could be retrieved from
+//! `entry` if `GardeningError` prescribed to [`keep_original`], but let's keep
+//! our examples as simple as possible for now).
+//!
+//! Multiple [`Entry`]-ies can be stacked in a [`Stack`], allowing us to track error
 //! propagation. Because every [`Doom`] error can be converted into an [`Entry`],
 //! a [`Stack`] can seamlessly archive errors of different types:
 //!
@@ -375,9 +392,9 @@
 //! use doomstack::Stack;
 //!
 //! fn could_go_wrong() -> Result<(), Stack> {
-//!     // This could return, e.g., a `Stack` with an `HoseError`, a
-//!     // `GardeningError` and a `LandscapingError` error, each archived
-//!     // into an `Entry`.
+//!     // This could return, e.g., a `Stack` with an `GardeningError` on
+//!     // top of a `LandscapingError` on top of a `ShearsError`, each
+//!     // archived into an `Entry`.
 //!     # Ok(())
 //! }
 //! ```
@@ -387,9 +404,9 @@
 //! (non-typed) [`Stack`] of [`Entry`]-ies, archiving `MyError`'s predecessors.
 //! `MyError` is the most recent error, and as such, it is typed, stored on the
 //! stack, and ready for exhaustive, programmatic handling. `MyError`'s
-//! predecessors, whose types are less likely to contribute useful error-handling
-//! details, are archived, tracking the sequence of errors that led to `MyError`
-//! without bloating stack and type system:
+//! predecessors, whose types, variants and fields are less likely to contribute
+//! useful error-handling details, are archived in a [`Stack`], tracking the
+//! sequence of errors that led to `MyError` without bloating stack and type system:
 //! ```
 //! # use doomstack::{Description, Doom, Stack};
 //! #
@@ -425,7 +442,7 @@
 //! #
 //! use doomstack::Top;
 //!
-//! fn tend_garden() -> Result<(), Top<GardeningError>> {
+//! fn garden() -> Result<(), Top<GardeningError>> {
 //!     if let Err(stack) = could_go_wrong() {
 //!         return Err(stack.push(
 //!             GardeningError {
@@ -438,7 +455,7 @@
 //!     Ok(())
 //! }
 //!
-//! if let Err(top) = tend_garden() {
+//! if let Err(top) = garden() {
 //!     println!("This time the casualties were {}", top.doom().casualties);
 //!     println!("Leading up to the catastrophe:");
 //!     for entry in top.stack().entries() {
@@ -447,14 +464,24 @@
 //! }
 //! ```
 //!
-//! The above examples are lengthy and pedantic to be more understandable, but don't
-//! worry: Doomstack comes packed macros and syntax sugar that makes error handling
-//! easy as cake. Read around to learn more!
+//! Best of both worlds! Our `Top<GardeningError>` stores the (most recent)
+//! `GardeningError` (which we can access via the [`doom`] getter), as well as
+//! all of `GardeningError`'s predecessors (in their archived form, accessible
+//! via the [`stack`] getter). This enables exhaustive error handling, enabled
+//! by Rust's powerful type system, for the last, most recent error. For
+//! everything that came before that, [`Top`] still archives (at least) every
+//! error's [`tag`] and [`description`], as well as (optionally) a
+//! well-formatted [`Location`] indicating where the error was last `spot`ed.
+//! You need the original copy of a [`Doom`] deep in a [`Top`]'s predecessors
+//! [`Stack`]? No problem: indicate that with [`Doom::keep_original`] and
+//! use dynamic dispatch only when you need it!
 //!
 //! [`tag`]: Doom::tag
 //! [`description`]: Doom::description
 //! [`keep_original`]: Doom::keep_original
 //! [`fot`]: Doom::fot
+//! [`archive`]: Entry::archive
+//! [`spot`]: ResultExt::spot
 //! [`pot`]: ResultExt::pot
 
 mod description;
