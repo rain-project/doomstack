@@ -465,13 +465,14 @@
 //! ```
 //!
 //! Best of both worlds! Our `Top<GardeningError>` stores the (most recent)
-//! `GardeningError` (which we can access via the [`doom`] getter), as well as
+//! `GardeningError` (which we can access via the [`Top::doom`] getter), as well as
 //! all of `GardeningError`'s predecessors (in their archived form, accessible
-//! via the [`stack`] getter). This enables exhaustive error handling, enabled
+//! via the [`Top::stack`] getter). This enables exhaustive error handling, enabled
 //! by Rust's powerful type system, for the last, most recent error. For
 //! everything that came before that, [`Top`] still archives (at least) every
-//! error's [`tag`] and [`description`], as well as (optionally) a
-//! well-formatted [`Location`] indicating where the error was last `spot`ed.
+//! error's [`tag`] and [`description`], as well as (optionally) a [`Location`]
+//! indicating where the error was last `spot`ed, which is guaranteed to be
+//! meaningful, well-formatted and consistent regardless of compilation profile.
 //! You need the original copy of a [`Doom`] deep in a [`Top`]'s predecessors
 //! [`Stack`]? No problem: indicate that with [`Doom::keep_original`] and
 //! use dynamic dispatch only when you need it!
