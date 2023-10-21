@@ -1,18 +1,60 @@
 use crate::{Description, Location, ResultExt, Stack, Top};
 
-/// [`Doom`] is a trait representing the basic expectations for [`doomstack`] errors.
+/// [`Doom`] is a trait representing the basic expectations for [doomstack](crate) errors.
 ///
 /// Errors must describe themselves via [`Doom::tag`] (which should identify the error
 /// type with a short, one-word, statically-defined tag, usually the type or variant of
 /// the error) and [`Doom::description`] (which should provide a one-sentence description
-/// of the error, and can be either statically or dynamically defined).
+/// of the error, and can be either statically or dynamically defined, see [`Description`]).
 ///
-/// Optionally, a [`doomstack`] error can override [`Doom::keep_original`] to indicate
+/// Optionally, a [doomstack](crate) error can override [`Doom::keep_original`] to indicate
 /// whether or not the original error should be kept (in a [`Box<dyn Any>`], see
 /// [`crate`]-level documentation) when the error is archived in an [`Entry`] (a default
 /// implementation of [`Doom::keep_original`] is provided, which always returns `false`).
 ///
-/// # Examples
+/// # Derivable
+///
+/// [`Doom`] can be derived for both structs and enums.
+///
+/// #### The `description` attribute
+///
+/// To derive [`Doom`], all you need to do is provide a `#[doom(description(...))]`
+/// attribute for every group of fields in your type. This means: one description
+/// per struct; one description per enum variant.
+///
+/// ```
+/// # use doomstack::Doom;
+/// #
+/// #[derive(Doom)]
+/// #[doom(description("Hose malfunctioned (pressure was {pressure}, {holes} holes formed)"))]
+/// struct HoseError {
+///     pressure: f32,
+///     holes: u32,
+/// }
+///
+/// #[derive(Doom)]
+/// enum IrrigationError {
+///     #[doom(description("Faucet broken."))]
+///     FaucetBroken,
+///     #[doom(description("Forgot to water for {days} days."))]
+///     ForgotToWater { days: u32 },
+/// }
+/// ```
+///
+/// The `#[doom(description(...))]` attribute can be used very much like the [`format!`]
+/// macro: one format string literal, optionally followed by arguments to format. If you
+/// want to include the fields of your struct or variant in your description, keep the
+/// following in mind:
+///
+///  - The `self` keyword is always at your disposal, capturing an immutable reference
+///    to your type (struct or enum).
+///  - If you are describing a group of named fields, every field is available to you
+///    by its name, captured as an immutable reference.
+///  - If you are describing a group of unnamed fields, every field is available to
+///    you by its index, prefixed by an underscore (`_`), captured as an immutable
+///    reference.
+///
+/// # Manual implementation
 ///
 /// ```
 /// use doomstack::{Description, Doom};
