@@ -94,7 +94,7 @@
 //! > _"An `E` just happened, possibly resulting from previous errors lower in the stack."_
 //!
 //! (The reason why `Top`s are generics is to make the top error available as-is, fully
-//! typed, with no need for dynamic dispatch. Let's not worry about this now, we'll
+//! typed, with no need for dynamic dispatch. Let's not worry about that now, we'll
 //! thoroughly discuss this design choice in the [Design philosophy](#design-philosophy)
 //! section of this guide.)
 //!
@@ -129,7 +129,7 @@
 //!      then [`ResultExt::spot`]) pushes the `IrrigationError` on a new, otherwise empty
 //!      `Top<IrrigationError>`, labels the top error in the [`Top`] (the `IrrigationError`)
 //!      as having occurred [`here!()`], then wraps the `Top<IrrigationError>` in the [`Err`]
-//!      variant of a result.
+//!      variant of a [`Result`].
 //!
 //! A lot is achieved in one line! We create an `IrrigationError`, we wrap it in a [`Top`],
 //! we flag it as having occurred [`here!()`], and finally we wrap the [`Top`] in an [`Err`],
@@ -385,9 +385,9 @@
 //! // but we can no longer, e.g., get `entry.tool_involved` as a concrete `Tool`.
 //! ```
 //!
-//! (In the example above, the original, typed `error` could be retrieved from
-//! `entry` if `GardeningError` prescribed to [`keep_original`], but let's keep
-//! our examples as simple as possible for now).
+//! (In the example above, the original, the fully typed `error` could be retrieved
+//! from `entry` if `GardeningError` prescribed to [`keep_original`] in its [`Doom`]
+//! implementation, but let's keep our examples as simple as possible for now).
 //!
 //! ##### A [`Stack`] stores many [`Entry`]-ies
 //!
@@ -409,13 +409,13 @@
 //! ##### A [`Top`] is a [`Stack`] with a [`Doom`] on top
 //!
 //! Between typed [`Doom`]s and non-typed [`Stack`]s, Doomstack offers [`Top`]s.
-//! Simply put, a `Top<MyError>` is a (typed) `MyError`, sitting on top of a
-//! (non-typed) [`Stack`] of [`Entry`]-ies, archiving `MyError`'s predecessors.
-//! `MyError` is the most recent error, and as such, it is typed, stored on the
-//! stack, and ready for exhaustive, programmatic handling. `MyError`'s
-//! predecessors, whose types, variants and fields are less likely to contribute
-//! useful error-handling details, are archived in a [`Stack`], tracking the
-//! sequence of errors that led to `MyError` without bloating stack and type system:
+//! Simply put, a `Top<E>` is a (typed) `E`, sitting on top of a (non-typed)
+//! [`Stack`] of [`Entry`]-ies, archiving `E`'s predecessors. `E` is the most
+//! recent error, and as such, it is typed, stored on the stack, and ready for
+//! exhaustive, programmatic handling. `E`'s predecessors, whose types, variants
+//! and fields are less likely to contribute useful error-handling details, are
+//! archived in a [`Stack`], tracking the sequence of errors that led to `E`
+//! without bloating stack and type system:
 //! ```
 //! # use doomstack::{Description, Doom, Stack};
 //! #
