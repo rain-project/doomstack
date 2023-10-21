@@ -236,7 +236,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     }
 
     /// Syntax sugar for [`Doom::fail_as_stack`], then [`ResultExt::spot`].
-    /// 
+    ///
     /// Calling `doom.fail_as_stack().spot(location)` is equivalent to calling `doom.fot_as_stack(location)`.
     fn fot_as_stack<O>(self, location: Location) -> Result<O, Stack> {
         Err(self.into_stack()).spot(location)
