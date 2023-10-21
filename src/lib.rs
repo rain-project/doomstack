@@ -284,9 +284,12 @@
 //! #### Doomstack's compromise
 //!
 //! Doomstack tries to offer an healthy compromise between typed and non-typed errors:
-//! _the most recent error is typed, its predecessors are non-typed_. As in typed error
-//! handling, a Doomstack error is a user-defined `struct` or `enum` (implementing the
-//! [`Doom`] trait):
+//! _the most recent error is typed, its predecessors are non-typed_.
+//!
+//! ##### Errors implement [`Doom`]
+//!
+//! As in typed error handling, a Doomstack error is a user-defined `struct` or `enum`
+//! (implementing the [`Doom`] trait):
 //!
 //! ```
 //! use doomstack::{Description, Doom};
@@ -324,6 +327,8 @@
 //! section shortcut-free just to help you understand how [doomstack](crate) is designed.
 //! Jump back to [Quick-start example](#quick-start-example) for a hands-on example on
 //! how to use [doomstack](crate) in practice.)
+//!
+//! ##### An [`Entry`] archives a [`Doom`]
 //!
 //! To enable non-typed error handling, a `Doom` error can be [`archive`]d into a common
 //! type, [`Entry`], which captures some of the properties of the original error (e.g.,
@@ -384,6 +389,8 @@
 //! `entry` if `GardeningError` prescribed to [`keep_original`], but let's keep
 //! our examples as simple as possible for now).
 //!
+//! ##### A [`Stack`] stores many [`Entry`]-ies
+//!
 //! Multiple [`Entry`]-ies can be stacked in a [`Stack`], allowing us to track error
 //! propagation. Because every [`Doom`] error can be converted into an [`Entry`],
 //! a [`Stack`] can seamlessly archive errors of different types:
@@ -398,6 +405,8 @@
 //!     # Ok(())
 //! }
 //! ```
+//!
+//! ##### A [`Top`] is a [`Stack`] with a [`Doom`] on top
 //!
 //! Between typed [`Doom`]s and non-typed [`Stack`]s, Doomstack offers [`Top`]s.
 //! Simply put, a `Top<MyError>` is a (typed) `MyError`, sitting on top of a
