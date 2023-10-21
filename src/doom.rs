@@ -199,7 +199,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     /// Calling `doom.fail().spot(location)` is equivalent to calling `doom.fot(location)`.
     fn fot<O>(self, location: Location) -> Result<O, Top<Self>> {
-        Err(self.into_top()).spot(location)
+        self.fail().spot(location)
     }
 
     /// Wraps `self` into a `Stack` (as in [`Doom::into_stack()`]), then into the `Err`
@@ -239,6 +239,6 @@ pub trait Doom: 'static + Sized + Send + Sync {
     ///
     /// Calling `doom.fail_as_stack().spot(location)` is equivalent to calling `doom.fot_as_stack(location)`.
     fn fot_as_stack<O>(self, location: Location) -> Result<O, Stack> {
-        Err(self.into_stack()).spot(location)
+        self.fail_as_stack().spot(location)
     }
 }
