@@ -11,9 +11,9 @@
 //!
 //! #[derive(Doom)]
 //! enum IrrigationError {
-//!     #[doom(description("Faucet broken."))]
+//!     #[doom(description("Faucet broken"))]
 //!     FaucetBroken,
-//!     #[doom(description("Forgot to water for {days} days."))]
+//!     #[doom(description("Forgot to water for {days} days"))]
 //!     ForgotToWater { days: u32 },
 //! }
 //!
@@ -31,9 +31,9 @@
 //!
 //! #[derive(Doom)]
 //! enum GardeningError {
-//!     #[doom(description("Not enough water."))]
+//!     #[doom(description("Not enough water"))]
 //!     NotEnoughWater,
-//!     #[doom(description("Not enough sunlight."))]
+//!     #[doom(description("Not enough sunlight"))]
 //!     NotEnoughSunlight,
 //! }
 //!
@@ -107,9 +107,9 @@
 //! #
 //! # #[derive(Doom)]
 //! # enum IrrigationError {
-//! #     #[doom(description("Faucet broken."))]
+//! #     #[doom(description("Faucet broken"))]
 //! #     FaucetBroken,
-//! #     #[doom(description("Forgot to water for {days} days."))]
+//! #     #[doom(description("Forgot to water for {days} days"))]
 //! #     ForgotToWater { days: u32 },
 //! # }
 //! #
@@ -151,17 +151,17 @@
 //! #
 //! # #[derive(Doom)]
 //! # enum IrrigationError {
-//! #     #[doom(description("Faucet broken."))]
+//! #     #[doom(description("Faucet broken"))]
 //! #     FaucetBroken,
-//! #     #[doom(description("Forgot to water for {days} days."))]
+//! #     #[doom(description("Forgot to water for {days} days"))]
 //! #     ForgotToWater { days: u32 },
 //! # }
 //! #
 //! # #[derive(Doom)]
 //! # enum GardeningError {
-//! #     #[doom(description("Not enough water."))]
+//! #     #[doom(description("Not enough water"))]
 //! #     NotEnoughWater,
-//! #     #[doom(description("Not enough sunlight."))]
+//! #     #[doom(description("Not enough sunlight"))]
 //! #     NotEnoughSunlight,
 //! # }
 //! #
@@ -522,7 +522,7 @@ mod tests {
     use crate as doomstack;
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Unit `struct` error."))]
+    #[doom(description("Unit `struct` error"))]
     #[doom(wrap(unit_struct_error))]
     struct UnitStructError;
 
@@ -538,7 +538,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Empty tuple-like `struct` error."))]
+    #[doom(description("Empty tuple-like `struct` error"))]
     #[doom(wrap(empty_tuple_struct_error))]
     struct EmptyTupleStructError();
 
@@ -551,7 +551,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Single-item tuple-like `struct` error."))]
+    #[doom(description("Single-item tuple-like `struct` error"))]
     #[doom(wrap(single_item_tuple_struct_error))]
     struct SingleItemTupleStructError(u32);
 
@@ -564,7 +564,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Multiple-item tuple-like `struct` error."))]
+    #[doom(description("Multiple-item tuple-like `struct` error"))]
     #[doom(wrap(multiple_item_tuple_struct_error))]
     struct MultipleItemTupleStructError(u32, u64);
 
@@ -577,7 +577,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Empty C-style `struct` error."))]
+    #[doom(description("Empty C-style `struct` error"))]
     #[doom(wrap(empty_c_struct_error))]
     struct EmptyCStructError {}
 
@@ -590,7 +590,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Single-item C-style `struct` error."))]
+    #[doom(description("Single-item C-style `struct` error"))]
     #[doom(wrap(single_item_c_struct_error))]
     struct SingleItemCStructError {
         _x: u32,
@@ -605,7 +605,7 @@ mod tests {
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
-    #[doom(description("Multiple-item C-style `struct` error."))]
+    #[doom(description("Multiple-item C-style `struct` error"))]
     #[doom(wrap(multiple_item_c_struct_error))]
     struct MultipleItemCStructError {
         _x: u32,
@@ -622,25 +622,25 @@ mod tests {
 
     #[derive(Debug, PartialEq, Eq, Doom)]
     enum EnumError {
-        #[doom(description("Unit variant."))]
+        #[doom(description("Unit variant"))]
         #[doom(wrap(unit_variant))]
         UnitVariant,
-        #[doom(description("Empty tuple-like variant."))]
+        #[doom(description("Empty tuple-like variant"))]
         #[doom(wrap(empty_tuple_variant))]
         EmptyTupleVariant(),
-        #[doom(description("Single-item tuple-like variant."))]
+        #[doom(description("Single-item tuple-like variant"))]
         #[doom(wrap(single_item_tuple_variant))]
         SingleItemTupleVariant(u32),
-        #[doom(description("Multiple-item tuple-like variant."))]
+        #[doom(description("Multiple-item tuple-like variant"))]
         #[doom(wrap(multiple_item_tuple_variant))]
         MultipleItemTupleVariant(u32, u64),
-        #[doom(description("Empty C-style variant."))]
+        #[doom(description("Empty C-style variant"))]
         #[doom(wrap(empty_c_variant))]
         EmptyCVariant {},
-        #[doom(description("Single-item C-style variant."))]
+        #[doom(description("Single-item C-style variant"))]
         #[doom(wrap(single_item_c_variant))]
         SingleItemCVariant { _x: u32 },
-        #[doom(description("Multiple-item C-style variant."))]
+        #[doom(description("Multiple-item C-style variant"))]
         #[doom(wrap(multiple_item_c_variant))]
         MultipleItemCVariant { _x: u32, _y: u32 },
     }
