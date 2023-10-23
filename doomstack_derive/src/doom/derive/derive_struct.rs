@@ -42,7 +42,7 @@ impl Derive {
                 quote!(doomstack::Description::Static(#description))
             }
             Description::Owned { format, arguments } => quote!(doomstack::Description::Owned(
-                format!(#format, #(#arguments),*)
+                format!(#format #(#arguments)*)
             )),
         };
 
