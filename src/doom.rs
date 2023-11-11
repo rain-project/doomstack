@@ -54,6 +54,35 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///    you by its index, prefixed by an underscore (`_`), captured as an immutable
 ///    reference.
 ///
+/// This means all of the following are allowed:
+/// ```
+/// # use doomstack::Doom;
+/// #
+/// #[derive(Doom)]
+/// #[doom(description("Error code: {}, severity: {}, message: {_1}", self.0, self.severity()))]
+/// struct TupleLikeError(u32, String);
+///
+/// impl TupleLikeError {
+///     fn severity(&self) -> u32 {
+///         // ...
+///         # unimplemented!()
+///     }
+/// }
+///
+/// #[derive(Doom)]
+/// enum EnumError {
+///     #[doom(description("Error code: {code}, message: {message}"))]
+///     NamedFields {
+///         code: u32,
+///         message: String
+///     },
+///     #[doom(description("Error code: {_0}, message: {_1}"))]
+///     UnnamedFields(u32, String),
+///     #[doom(description("Error code: {}", match self { EnumError::UnnecessarilyContrivedExample(code) => code, _ => unreachable!()}))]
+///     UnnecessarilyContrivedExample(u32),
+/// }
+/// ```
+///
 /// # Manual implementation
 ///
 /// ```
