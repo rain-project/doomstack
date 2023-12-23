@@ -8,9 +8,9 @@ use std::{
 /// An [`Entry`] is an element of an error [`Stack`], archiving a [`Doom`] error.
 ///
 /// In archiving a [`Doom`] error, an [`Entry`] captures the error's [`Doom::description()`]
-/// and [`Doom::tag()`], along with a copy of the original error (held in a [`Box<dyn Any>`]),
-/// if prescribed by [`Doom::keep_original()`], and the (optional) [`Location`] at which the
-/// [`Entry`] was last [`spot()`]-ted.
+/// and [`Doom::tag()`], along with a copy of the original error (held in a [`Box<dyn Any>`],
+/// only if prescribed by [`Doom::keep_original()`]), and the (optional) [`Location`] at
+/// which the [`Entry`] was last [`spot()`]-ted.
 ///
 /// # Examples
 ///
@@ -69,8 +69,12 @@ pub struct Entry {
 }
 
 impl Entry {
-    /// Archives a [`Doom`] error, capturing its [`Doom::tag()`], [`Doom::description()`] and (if
-    /// prescribed by [`Doom::keep_original()`]) original value.
+    /// Archives a [`Doom`] error, capturing its [`Doom::tag()`], [`Doom::description()`].
+    ///
+    /// If prescribed by [`Doom::keep_original()`]), [`Entry::archive`] additionally stores
+    /// the original error in a [`Box<dyn Any>`] for later retrieval.
+    ///
+    /// [`Box<dyn Any>`]: Any
     pub fn archive<D>(doom: D) -> Self
     where
         D: Doom,
@@ -106,17 +110,39 @@ impl Entry {
         self.location
     }
 
-    /// Returns the original [`Doom`] error the [`Entry`] archived (if prescribed by
-    /// [`Doom::keep_original()`]).
+    /// Returns, if available, the original [`Doom`] error stored upon archival.
     pub fn original(&self) -> Option<&(dyn Any + Send + Sync)> {
         self.original.as_ref().map(AsRef::as_ref)
     }
 
     /// Sets the [`Location`] the [`Entry`] was last spotted at.
     ///
-    /// Usually used in conjuction with the [`here!()`] macro.
+    /// Usually used in conjuction with the [`here!()`] macro, the [`Entry::spot`]
+    /// updates the [`Location`] (filename and line number) at which the [`Entry`]
+    /// was last spotted. [`Entry`]-ies are usually [`spot()`]-ed where they are
+    /// created and pushed on a [`Stack`] or [`Top`]. Depending on your needs,
+    /// you may decide to [`spot()`] an [`Entry`] elsewhere, as it propagates
+    /// through your code. Remember, however, that [`Entry::spot`] _updates_ the
+    /// [`Entry`]'s last spotted [`Location`], overwriting whatever [`Location`]
+    /// the [`Entry`] was previously [`spot()`]-ed at. To track an error as it
+    /// propagates through your code, consider [`push()`]-ing multiple [`Entry`]-ies
+    /// errors onto a [`Stack`] or [`Top`], tagging each [`Entry`] with an
+    /// appropriate [`Location`] (see [`crate`]-level documentation for additional
+    /// detail).
+    ///
+    /// For everyday operations, it is unlikely you'll need to call [`Entry::spot`]
+    /// directly. More often than not, you will rather call [`ResultExt::spot`],
+    /// [`Top::spot`] or [`Stack::spot`], all of which forward your call to the
+    /// appropriate [`Top`] or [`Entry`].
     ///
     /// [`here!()`]: crate::here!
+    /// [`spot()`]: Entry::spot
+    /// [`push()`]: crate::Top::push
+    /// [`ResultExt::spot`]: crate::ResultExt::spot
+    /// [`Stack`]: crate::Stack
+    /// [`Stack::spot`]: crate::Stack::spot
+    /// [`Top`]: crate::Top
+    /// [`Top::spot`]: crate::Top::spot
     pub fn spot(&mut self, location: Location) {
         self.location = Some(location);
     }
