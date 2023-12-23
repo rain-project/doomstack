@@ -1,4 +1,4 @@
-/// Expands to a [`Location`] containing the [`file`] and [`line`] in which it was invoked.
+/// Expands to a [`Location`] containing the [`file`] and [`line`] at which it was invoked.
 ///
 /// Lines are 1-based, so the first line in each file evaluates to 1, the second to 2, etc.
 /// [`here!()`] can be used to quickly mark where a [`Stack`] or [`Top`] was `spot()`-ted.
@@ -12,7 +12,7 @@
 /// let location2 = here!();
 ///
 /// assert_eq!(location1.file, location2.file);
-/// assert_eq!(location1.line + 1, location2.line);
+/// assert_eq!(location1.line + 1, location2.line); // `location2` was created one line after `location1`
 /// ```
 ///
 /// [`Location`]: crate::Location
