@@ -123,7 +123,7 @@
 //!    is broken. Remember that `IrrigationError` implements `Doom`. This will be useful
 //!    in the next step.
 //!  - We call `fot(here!())` on our `IrrigationError`:
-//!    * The [`here!()`] macro evaluates to the code [`Location`] (filename and line)
+//!    * The [`here!()`] macro evaluates to the code [`Location`] (file name and line)
 //!      where [`here!()`] is invoked.
 //!    * The [`fot`] method (part of the [`Doom`] trait, syntax sugar for [`Doom::fail`],
 //!      then [`ResultExt::spot`]) pushes the `IrrigationError` on a new, otherwise empty

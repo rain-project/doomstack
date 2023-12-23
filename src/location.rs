@@ -1,6 +1,6 @@
 use std::fmt::{self, Debug, Display, Formatter};
 
-/// The location of a line of code.
+/// The location of a line of code (file name and line number).
 ///
 /// See [`here!()`] for a simple way to get the [`Location`] of a piece of code.
 ///

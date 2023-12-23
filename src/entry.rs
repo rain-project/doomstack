@@ -118,7 +118,7 @@ impl Entry {
     /// Sets the [`Location`] the [`Entry`] was last spotted at.
     ///
     /// Usually used in conjuction with the [`here!()`] macro, the [`Entry::spot`]
-    /// updates the [`Location`] (filename and line number) at which the [`Entry`]
+    /// updates the [`Location`] (file name and line number) at which the [`Entry`]
     /// was last spotted. [`Entry`]-ies are usually [`spot()`]-ed where they are
     /// created and pushed on a [`Stack`] or [`Top`]. Depending on your needs,
     /// you may decide to [`spot()`] an [`Entry`] elsewhere, as it propagates
