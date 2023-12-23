@@ -360,6 +360,13 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///
 /// # Manual implementation
 ///
+/// An implementation of [`Doom`] must provide [`Doom::tag`] and [`Doom::description`].
+/// Remember: [`Doom::tag`] should return a short, one-word, static identifier for
+/// the error (you should probably just use the name of the relevant struct or enum
+/// variant); [`Doom::tag`] should return a short, one-sentence description for the
+/// error, and can be statically or dynamically defined (see [`Description`] for
+/// additional information).
+///
 /// ```
 /// use doomstack::{Description, Doom};
 ///
@@ -390,6 +397,40 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///                 "Dropped flowerpot from {height} meters, plants crashed and many injured"
 ///             )),
 ///         }
+///     }
+/// }
+/// ```
+///
+/// An additional method you might want to implement is [`Doom::keep_original`], which indicates
+/// whether or not a copy of the original error should be kept (in a [`Box<dyn Any>`]) when the
+/// error is archived in an [`Entry`]. A default implementation is provided, which always
+/// returns `false`.
+///
+/// ```
+/// use doomstack::{Description, Doom};
+///
+/// struct ToolError {
+///     severity: u32,
+///     tool: Tool,
+/// }
+///
+/// enum Tool {
+///     Rake,
+///     Hose,
+///     Spade,
+/// }
+///
+/// impl Doom for ToolError {
+///     fn tag(&self) -> &'static str {
+///         "ToolError"
+///     }
+///
+///     fn description(&self) -> Description {
+///         Description::Static("Error involving a tool")
+///     }
+///
+///     fn keep_original(&self) -> bool {
+///         self.severity > 3
 ///     }
 /// }
 /// ```
