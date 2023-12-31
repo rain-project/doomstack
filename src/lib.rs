@@ -399,7 +399,7 @@
 //! use doomstack::Stack;
 //!
 //! fn could_go_wrong() -> Result<(), Stack> {
-//!     // This could return, e.g., a `Stack` with an `GardeningError` on
+//!     // This could return, e.g., a `Stack` with a `GardeningError` on
 //!     // top of a `LandscapingError` on top of a `ShearsError`, each
 //!     // archived into an `Entry`.
 //!     # Ok(())
