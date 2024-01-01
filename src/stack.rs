@@ -1,5 +1,6 @@
 use crate::{Doom, Entry, Location, Top};
 use std::{
+    any::Any,
     error::Error,
     fmt::{self, Debug, Display, Formatter},
 };
@@ -83,6 +84,24 @@ impl Stack {
     /// pushed) to bottom (i.e., first pushed).
     pub fn entries(&self) -> impl Iterator<Item = &Entry> {
         self.entries.iter().rev()
+    }
+
+    /// Returns an iterator over the [`Doom`] errors that were stored upon archival
+    /// in the [`Stack`]'s [`Entry`]-ies, top (i.e., most recently pushed) to bottom
+    /// (i.e., first pushed).
+    pub fn originals(&self) -> impl Iterator<Item = &(dyn Any + Send + Sync)> {
+        self.entries().filter_map(Entry::original)
+    }
+
+    /// Returns an iterator over the [`Doom`] errors of type `O` that were stored
+    /// upon archival in the [`Stack`]'s [`Entry`]-ies, top (i.e., most recently
+    /// pushed) to bottom (i.e., first pushed).
+    pub fn originals_by_type<O>(&self) -> impl Iterator<Item = &O>
+    where
+        O: 'static,
+    {
+        self.originals()
+            .filter_map(<dyn Any + Send + Sync>::downcast_ref::<O>)
     }
 
     /// Pushes a [`Doom`] error on top of the current [`Stack`], producing a [`Top`].
