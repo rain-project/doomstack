@@ -30,22 +30,7 @@ impl Derive {
 
         let description_branches = variants.iter().map(|variant| {
             let variant_identifier = &variant.identifier;
-
-            let bind = match &variant.fields {
-                Fields::Named(fields) => {
-                    let fields = fields.iter().map(|(_, identifier)| identifier);
-                    quote!({#(#fields),*})
-                }
-
-                Fields::Unnamed(fields) => {
-                    let fields = (0..fields.len())
-                        .map(|index| Ident::new(format!("_{index}",).as_str(), Span::call_site()));
-
-                    quote!((#(#fields),*))
-                }
-
-                Fields::Unit => quote!(),
-            };
+            let variant_binds = Derive::derive_variant_binds(&variant.fields);
 
             let format = match &variant.settings.description {
                 Description::Static { description } => {
@@ -57,7 +42,7 @@ impl Derive {
             };
 
             quote! {
-                #identifier::#variant_identifier #bind => {
+                #identifier::#variant_identifier #variant_binds => {
                     #format
                 }
             }
@@ -71,10 +56,40 @@ impl Derive {
             }
         };
 
+        let keep_original_branches = variants.iter().map(|variant| {
+            let variant_identifier = &variant.identifier;
+            let variant_binds = Derive::derive_variant_binds(&variant.fields);
+
+            let condition = if let Some(keep_original) = &variant.settings.keep_original {
+                if let Some(condition) = &keep_original.condition {
+                    quote!(#(#condition)*)
+                } else {
+                    quote!(true)
+                }
+            } else {
+                quote!(false)
+            };
+
+            quote! {
+                #identifier::#variant_identifier #variant_binds => {
+                    #condition
+                }
+            }
+        });
+
+        let keep_original = quote! {
+            fn keep_original(&self) -> bool {
+                match self {
+                    #(#keep_original_branches)*
+                }
+            }
+        };
+
         quote! {
             impl doomstack::Doom for #identifier {
                 #tag
                 #description
+                #keep_original
             }
         }
     }
@@ -98,5 +113,23 @@ impl Derive {
                 ))
             })
             .collect()
+    }
+
+    fn derive_variant_binds(fields: &Fields) -> TokenStream {
+        match fields {
+            Fields::Named(fields) => {
+                let fields = fields.iter().map(|(_, identifier)| identifier);
+                quote!({#(#fields),*})
+            }
+
+            Fields::Unnamed(fields) => {
+                let fields = (0..fields.len())
+                    .map(|index| Ident::new(format!("_{index}",).as_str(), Span::call_site()));
+
+                quote!((#(#fields),*))
+            }
+
+            Fields::Unit => quote!(),
+        }
     }
 }
