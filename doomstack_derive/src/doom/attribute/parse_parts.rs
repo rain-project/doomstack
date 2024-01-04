@@ -7,6 +7,8 @@ use proc_macro_error::{Diagnostic, Level};
 use std::collections::VecDeque;
 use syn::{Ident, Meta};
 
+// TODO: Fix `Attribute::parse_parts` for `#[doom]` (it should produce an error, it doesn't)
+
 impl Attribute {
     /// Parses a [`syn::Attribute`] to extract an [`Attribute`]'s kind and (optional) body.
     ///
