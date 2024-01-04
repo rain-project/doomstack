@@ -682,4 +682,43 @@ mod tests {
             EnumError::MultipleItemCVariant { _x: 42, _y: 84 }
         );
     }
+
+    #[derive(Doom)]
+    #[doom(description("Default `keep_original` struct error"))]
+    struct DefaultKeepOriginalStructError;
+
+    #[derive(Doom)]
+    #[doom(description("Tagged `keep_original` struct error"))]
+    #[doom(keep_original)]
+    struct TaggedKeepOriginalStructError;
+
+    #[derive(Doom)]
+    #[doom(description("Conditional `keep_original` struct error"))]
+    #[doom(keep_original(*_severity > 42))]
+    struct ConditionalKeepOriginalStructError {
+        _severity: u32,
+    }
+
+    #[test]
+    fn keep_original() {
+        let default_keep_original_struct_entry = Entry::archive(DefaultKeepOriginalStructError);
+        assert!(default_keep_original_struct_entry.original().is_none());
+
+        let tagged_keep_original_struct_entry = Entry::archive(TaggedKeepOriginalStructError);
+        assert!(tagged_keep_original_struct_entry.original().is_some());
+
+        let unsatisfied_conditional_keep_original_struct_entry =
+            Entry::archive(ConditionalKeepOriginalStructError { _severity: 12 });
+
+        assert!(unsatisfied_conditional_keep_original_struct_entry
+            .original()
+            .is_none());
+
+        let satisfied_conditional_keep_original_struct_entry =
+            Entry::archive(ConditionalKeepOriginalStructError { _severity: 120 });
+
+        assert!(satisfied_conditional_keep_original_struct_entry
+            .original()
+            .is_some());
+    }
 }
