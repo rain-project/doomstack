@@ -1,18 +1,20 @@
 use crate::doom::{
     messages::{errors::*, helps::*},
-    Attribute, Description, Setting, Wrap,
+    Attribute, Description, KeepOriginal, Setting, Wrap,
 };
 use proc_macro2::Span;
 use proc_macro_error::{Diagnostic, Level};
 
 pub(crate) struct Settings {
     pub description: Description,
+    pub keep_original: Option<KeepOriginal>,
     pub wrap: Option<Wrap>,
 }
 
 #[derive(Default)]
 struct Collector {
     description: Option<Description>,
+    keep_original: Option<KeepOriginal>,
     wrap: Option<Wrap>,
 }
 
@@ -24,7 +26,7 @@ impl Settings {
         let mut collector = Collector::default();
 
         // Collect `attributes`' `Setting`s in `Collector`,
-        // deduplicating `Description`s and `Wrap`s
+        // deduplicating `Description`s, `KeepOriginal`s and `Wrap`s
 
         for attribute in attributes {
             match attribute.setting {
@@ -42,6 +44,22 @@ impl Settings {
                     }
 
                     collector.description = Some(description);
+                }
+
+                Setting::KeepOriginal(keep_original) => {
+                    if collector.keep_original.is_some() {
+                        // Multiple `KeepOriginal`s in `attributes`
+
+                        Diagnostic::spanned(
+                            attribute.spans.kind,
+                            Level::Error,
+                            MULTIPLE_KEEP_ORIGINALS.to_string(),
+                        )
+                        .help(OPTIONAL_KEEP_ORIGINAL.to_string())
+                        .abort();
+                    }
+
+                    collector.keep_original = Some(keep_original);
                 }
 
                 Setting::Wrap(wrap) => {
@@ -74,6 +92,7 @@ impl Settings {
 
         Settings {
             description: collector.description.unwrap(),
+            keep_original: collector.keep_original,
             wrap: collector.wrap,
         }
     }

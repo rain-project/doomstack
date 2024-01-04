@@ -14,6 +14,7 @@ pub(in crate::doom) mod errors {
     pub const UNEXPECTED_DESCRIPTION_ARGUMENTS: &str = "unexpected arguments in `description(format, ...)` attribute: `format` does not format any variable";
     pub const MULTIPLE_DESCRIPTIONS: &str = "multiple `description()` attributes for the same item";
     pub const MULTIPLE_WRAPS: &str = "multiple `wrap()` attributes for the same item";
+    pub const MULTIPLE_KEEP_ORIGINALS: &str = "multiple `keep_original()` attributes for the same item";
     pub const MISSING_DESCRIPTION: &str = "missing `description()` attribute";
     pub const UNION_UNDERIVABLE: &str = "deriving `Doom` for a `union` type";
 }
@@ -25,7 +26,7 @@ pub(in crate::doom) mod helps {
           `#[doom(attribute)]` or `#[doom(attribute(...))]`"#;
 
     pub const AVAILABLE_KINDS: &str = 
-          r#"available `doom()` attributes are: `description`, `wrap`"#;
+          r#"available `doom()` attributes are: `description`, `wrap`, `keep_original`"#;
 
     pub const WRAP_STYLE: &str = 
           r#"`wrap` attributes take the identifier of the wrapping constructor:
@@ -43,6 +44,9 @@ pub(in crate::doom) mod helps {
 
     pub const OPTIONAL_WRAP: &str = 
           r#"each item (`struct` or `enum` variant) must have at most one `wrap()` attribute"#;
+
+    pub const OPTIONAL_KEEP_ORIGINAL: &str = 
+          r#"each item (`struct` or `enum` variant) must have at most one `keep_original()` attribute"#;
 
     pub const DERIVABLES: &str = 
           r#"`Doom` can only be derived for `struct` or `enum` types"#;
