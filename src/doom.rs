@@ -1,6 +1,6 @@
 use crate::{Description, Location, ResultExt, Stack, Top};
 
-/// [`Doom`] is a trait representing the basic expectations for [doomstack](crate) errors.
+/// A trait representing the basic expectations for [doomstack](crate) errors.
 ///
 /// Errors must describe themselves via [`Doom::tag`] (which should identify the error
 /// type with a short, one-word, statically-defined tag, usually the type or variant of
@@ -358,6 +358,109 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///
 /// ```
 ///
+/// #### The `keep_original` attribute
+///
+/// When a [`Doom`] error is archived in an [`Entry`], by default the [`Entry`] captures
+/// only the error's [`Doom::tag`] and [`Doom::description`]. If instructed to do
+/// so by [`Doom::keep_original`], however, the [`Entry`] stores the original error
+/// itself (in a [`Box<dyn Any>`], see [`Entry`] for additional information). The default
+/// implementation of [`Doom::keep_original`] always returns `false`. The
+/// `#[doom(keep_original)]` attribute is designed to quickly indicate which errors
+/// should [`keep_original`].
+///
+/// If you want a struct error to always [`keep_original`], all you need to do is tag it
+/// with `#[doom(keep_original)]`:
+///
+/// ```
+/// # use doomstack::{Doom, Entry};
+/// #
+/// #[derive(Doom)]
+/// # #[doom(description("..."))]
+/// // #[doom(description(...))]
+/// #[doom(keep_original)]
+/// struct InfestationError {
+///     parasites: u32,
+/// }
+///
+/// let infestation_error = InfestationError { parasites: 1000 };
+/// let infestation_entry = Entry::archive(infestation_error);
+///
+/// assert!(infestation_entry.original().is_some());
+/// ```
+///
+/// For enums, it's more or less the same thing - just remember that `#[doom(keep_original)]`
+/// applies to individual variants and not to the enum as a whole:
+///
+/// ```
+/// # use doomstack::{Doom, Entry};
+/// #
+/// #[derive(Doom)]
+/// enum WaterError {
+///     # #[doom(description("..."))]
+///     // #[doom(description(...))]
+///     #[doom(keep_original)]
+///     WaterTooHot { temperature: f32 },
+///     # #[doom(description("..."))]
+///     // #[doom(description(...))]
+///     #[doom(keep_original)]
+///     WaterTooHumid { humidity: f32 },
+///     # #[doom(description("..."))]
+///     // #[doom(description(...))]
+///     WrongWaterColor,
+/// }
+///
+/// let too_humid_error = WaterError::WaterTooHumid { humidity: 99.8 };
+/// let too_humid_entry = Entry::archive(too_humid_error);
+///
+/// assert!(too_humid_entry.original().is_some());
+///
+/// let wrong_color_error = WaterError::WrongWaterColor;
+/// let wrong_color_entry = Entry::archive(wrong_color_error);
+///
+/// assert!(wrong_color_entry.original().is_none());
+/// ```
+///
+/// Note that, in the above example, `WaterError` doesn't [`keep_original`] if its
+/// variant is `WrongWaterColor`!
+///
+/// If you need to specify more complex conditions for [`Doom::keep_original`] to
+/// return `true`, simply add a boolean expression to your `#[doom(keep_original(...))]`
+/// attribute:
+///
+/// ```
+/// # use doomstack::{Doom, Entry};
+/// #
+/// #[derive(Doom)]
+/// # #[doom(description("..."))]
+/// // #[doom(description(...))]
+/// #[doom(keep_original(*severity > 42))]
+/// struct GroundError {
+///     severity: u32
+/// }
+///
+/// let insignificant_error = GroundError { severity: 42 };
+/// let insignificant_entry = Entry::archive(insignificant_error);
+///
+/// assert!(insignificant_entry.original().is_none());
+///
+/// let serious_error = GroundError { severity: 43 };
+/// let serious_entry = Entry::archive(serious_error);
+///
+/// assert!(serious_entry.original().is_some());
+/// ````
+///
+/// As with `#[doom(description(...))]`, a `#[doom(keep_original(...))]` condition can
+/// directly reference the fields of your struct or variant (we do exactly that in the
+/// example above):
+///
+///  - The `self` keyword is always at your disposal, capturing an immutable reference
+///    to your type (struct or enum).
+///  - If you are expressing your condition on a group of named fields, every field is
+///    available to you by its name, captured as an immutable reference.
+///  - If you are expressing your condition on a group of unnamed fields, every field is
+///    available to you by its index, prefixed by an underscore (i.e., `_0`, `_1` and so '
+///    on), captured as an immutable reference.
+///
 /// # Manual implementation
 ///
 /// An implementation of [`Doom`] must provide [`Doom::tag`] and [`Doom::description`].
@@ -438,6 +541,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// [`doomstack`]: crate
 /// [`Entry`]: crate::Entry
 /// [`Box<dyn Any>`]: std::any::Any
+/// [`keep_original`]: Doom::keep_original
 /// [`read`]: std::io::Read::read
 /// [`wrap`]: crate::ResultExt::wrap
 pub trait Doom: 'static + Sized + Send + Sync {
