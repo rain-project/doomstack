@@ -1,10 +1,14 @@
+// TODO: Organize messages by type / improve sorting
+// TODO: Refactor `STYLE` into `SYNTAX in const names`
 #[rustfmt::skip]
 pub(in crate::doom) mod errors {
-    pub const INCOMPLETE_ATTRIBUTE: &str = "incomplete `doom()` attribute";
+    pub const EMPTY_ATTRIBUTE: &str = "empty `doom()` attribute";
     pub const UNEXPECTED_TOKEN: &str = "unexpected token in `doom()` attribute";
     pub const UNEXPECTED_KIND: &str = "unexpected `doom()` attribute";
+    pub const MISSING_WRAP_BODY: &str = "missing body in `wrap()` attribute";
     pub const MISSING_WRAPPING_CONSTRUCTOR: &str = "missing constructor in `wrap()` attribute";
     pub const UNEXPECTED_WRAP_TOKEN: &str = "unexpected token in `wrap()` attribute";
+    pub const MISSING_DESCRIPTION_BODY: &str = "missing body in `description()` attribute";
     pub const MISSING_DESCRIPTION_FORMAT: &str = "missing format string in `description()` attribute";
     pub const UNEXPECTED_DESCRIPTION_TOKEN: &str = "unexpected token in `description()` attribute";
     pub const UNEXPECTED_DESCRIPTION_ARGUMENTS: &str = "unexpected arguments in `description(format, ...)` attribute: `format` does not format any variable";
@@ -16,9 +20,9 @@ pub(in crate::doom) mod errors {
 
 #[rustfmt::skip]
 pub(in crate::doom) mod helps {
-    pub const ATTRIBUTES_LIKE_FUNCTIONS: &str =
-          r#"`doom()` attributes look like function calls:
-          `#[doom(attribute(...))]`"#;
+    pub const ATTRIBUTES_SYNTAX: &str =
+          r#"`doom()` attributes look like tags or function calls:
+          `#[doom(attribute)]` or `#[doom(attribute(...))]`"#;
 
     pub const AVAILABLE_KINDS: &str = 
           r#"available `doom()` attributes are: `description`, `wrap`"#;

@@ -1,4 +1,5 @@
 use crate::doom::{
+    attribute::Spans,
     messages::{errors::*, helps::*},
     Attribute, Description,
 };
@@ -10,9 +11,25 @@ impl Attribute {
     /// Parses the body of a `description` attribute into a [`Description`]
     ///
     /// Inputs the `body` of a `#[doom(description(body))]` attribute. Expects
-    /// `body` to be feedable into [`format!`], i.e., a format string literal
-    /// followed by zero or more arguments to format. Returns a [`Description`].
-    pub(in crate::doom::attribute) fn parse_description(body: Group) -> Description {
+    /// `body` to be `Some(body)`, with `body` feedable into [`format!`], i.e.,
+    /// a format string literal followed by zero or more arguments to format.
+    /// Returns a [`Description`].
+    pub(in crate::doom::attribute) fn parse_description(
+        body: Option<Group>,
+        spans: &Spans,
+    ) -> Description {
+        // `body` must be `Some`
+
+        let Some(body) = body else {
+            Diagnostic::spanned(
+                spans.kind,
+                Level::Error,
+                MISSING_DESCRIPTION_BODY.to_string(),
+            )
+            .help(DESCRIPTION_STYLE.to_string())
+            .abort();
+        };
+
         let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
 
         // `body` must contain at least one format `LitStr`

@@ -22,8 +22,9 @@ impl Attribute {
         let spans = Spans { kind: kind.span() };
 
         let setting = match kind.to_string().as_str() {
-            "description" => Setting::Description(Attribute::parse_description(body)),
-            "wrap" => Setting::Wrap(Attribute::parse_wrap(body)),
+            "description" => Setting::Description(Attribute::parse_description(body, &spans)),
+            "wrap" => Setting::Wrap(Attribute::parse_wrap(body, &spans)),
+
             _ => Diagnostic::spanned(kind.span(), Level::Error, UNEXPECTED_KIND.to_string())
                 .help(AVAILABLE_KINDS.to_string())
                 .abort(),
