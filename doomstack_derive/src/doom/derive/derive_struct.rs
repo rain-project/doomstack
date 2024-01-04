@@ -25,6 +25,7 @@ impl Derive {
                 .into_iter()
                 .map(|index| {
                     let bind = Ident::new(format!("_{index}",).as_str(), Span::call_site());
+
                     let index = Index {
                         index,
                         span: Span::call_site(),
@@ -53,10 +54,26 @@ impl Derive {
             }
         };
 
+        let keep_original = settings.keep_original.as_ref().map(|keep_original| {
+            let condition = keep_original
+                .condition
+                .as_ref()
+                .map(|condition| quote!(#(#condition)*))
+                .unwrap_or(quote!(true));
+
+            quote! {
+                fn keep_original(&self) -> bool {
+                    #(#binds)*
+                    #condition
+                }
+            }
+        });
+
         quote! {
             impl doomstack::Doom for #identifier {
                 #tag
                 #description
+                #keep_original
             }
         }
     }
