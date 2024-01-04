@@ -528,82 +528,31 @@ mod tests {
     #[doom(wrap(unit_struct_error))]
     struct UnitStructError;
 
-    #[test]
-    fn unit_struct_error() {
-        assert_eq!(UnitStructError::unit_struct_error(()), UnitStructError);
-        assert_eq!(UnitStructError::unit_struct_error(42u32), UnitStructError);
-
-        assert_eq!(
-            UnitStructError::unit_struct_error((1u32, 2u64, "string")),
-            UnitStructError
-        );
-    }
-
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Empty tuple-like `struct` error"))]
     #[doom(wrap(empty_tuple_struct_error))]
     struct EmptyTupleStructError();
-
-    #[test]
-    fn empty_tuple_struct_error() {
-        assert_eq!(
-            EmptyTupleStructError::empty_tuple_struct_error(()),
-            EmptyTupleStructError()
-        );
-    }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Single-item tuple-like `struct` error"))]
     #[doom(wrap(single_item_tuple_struct_error))]
     struct SingleItemTupleStructError(u32);
 
-    #[test]
-    fn single_item_tuple_struct_error() {
-        assert_eq!(
-            SingleItemTupleStructError::single_item_tuple_struct_error(42),
-            SingleItemTupleStructError(42)
-        );
-    }
-
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Multiple-item tuple-like `struct` error"))]
     #[doom(wrap(multiple_item_tuple_struct_error))]
     struct MultipleItemTupleStructError(u32, u64);
-
-    #[test]
-    fn multiple_item_tuple_struct_error() {
-        assert_eq!(
-            MultipleItemTupleStructError::multiple_item_tuple_struct_error((42, 84)),
-            MultipleItemTupleStructError(42, 84)
-        );
-    }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Empty C-style `struct` error"))]
     #[doom(wrap(empty_c_struct_error))]
     struct EmptyCStructError {}
 
-    #[test]
-    fn empty_c_struct_error() {
-        assert_eq!(
-            EmptyCStructError::empty_c_struct_error(()),
-            EmptyCStructError {}
-        );
-    }
-
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Single-item C-style `struct` error"))]
     #[doom(wrap(single_item_c_struct_error))]
     struct SingleItemCStructError {
         _x: u32,
-    }
-
-    #[test]
-    fn single_item_c_struct_error() {
-        assert_eq!(
-            SingleItemCStructError::single_item_c_struct_error(42),
-            SingleItemCStructError { _x: 42 }
-        );
     }
 
     #[derive(Debug, PartialEq, Eq, Doom)]
@@ -615,7 +564,40 @@ mod tests {
     }
 
     #[test]
-    fn multiple_item_c_struct_error() {
+    fn wrap_structs() {
+        assert_eq!(UnitStructError::unit_struct_error(()), UnitStructError);
+        assert_eq!(UnitStructError::unit_struct_error(42u32), UnitStructError);
+
+        assert_eq!(
+            UnitStructError::unit_struct_error((1u32, 2u64, "string")),
+            UnitStructError
+        );
+
+        assert_eq!(
+            EmptyTupleStructError::empty_tuple_struct_error(()),
+            EmptyTupleStructError()
+        );
+
+        assert_eq!(
+            SingleItemTupleStructError::single_item_tuple_struct_error(42),
+            SingleItemTupleStructError(42)
+        );
+
+        assert_eq!(
+            MultipleItemTupleStructError::multiple_item_tuple_struct_error((42, 84)),
+            MultipleItemTupleStructError(42, 84)
+        );
+
+        assert_eq!(
+            EmptyCStructError::empty_c_struct_error(()),
+            EmptyCStructError {}
+        );
+
+        assert_eq!(
+            SingleItemCStructError::single_item_c_struct_error(42),
+            SingleItemCStructError { _x: 42 }
+        );
+
         assert_eq!(
             MultipleItemCStructError::multiple_item_c_struct_error((42, 84)),
             MultipleItemCStructError { _x: 42, _y: 84 }
@@ -648,7 +630,7 @@ mod tests {
     }
 
     #[test]
-    fn enum_error() {
+    fn wrap_enums() {
         assert_eq!(EnumError::unit_variant(()), EnumError::UnitVariant);
         assert_eq!(EnumError::unit_variant(42u32), EnumError::UnitVariant);
 
@@ -702,60 +684,52 @@ mod tests {
     }
 
     #[test]
-    fn keep_original_struct() {
-        let default_keep_original_struct_entry = Entry::archive(DefaultKeepOriginalStructError);
-        assert!(default_keep_original_struct_entry.original().is_none());
+    fn keep_original_structs() {
+        let default_entry = Entry::archive(DefaultKeepOriginalStructError);
+        assert!(default_entry.original().is_none());
 
-        let tagged_keep_original_struct_entry = Entry::archive(TaggedKeepOriginalStructError);
-        assert!(tagged_keep_original_struct_entry.original().is_some());
+        let tagged_entry = Entry::archive(TaggedKeepOriginalStructError);
+        assert!(tagged_entry.original().is_some());
 
-        let unsatisfied_conditional_keep_original_struct_entry =
+        let unsatisfied_conditional_entry =
             Entry::archive(ConditionalKeepOriginalStructError { _severity: 12 });
 
-        assert!(unsatisfied_conditional_keep_original_struct_entry
-            .original()
-            .is_none());
+        assert!(unsatisfied_conditional_entry.original().is_none());
 
-        let satisfied_conditional_keep_original_struct_entry =
+        let satisfied_conditional_entry =
             Entry::archive(ConditionalKeepOriginalStructError { _severity: 120 });
 
-        assert!(satisfied_conditional_keep_original_struct_entry
-            .original()
-            .is_some());
+        assert!(satisfied_conditional_entry.original().is_some());
     }
 
     #[derive(Doom)]
     enum KeepOriginalEnumError {
         #[doom(description("Default `keep_original` variant"))]
-        Default,
+        DefaultVariant,
         #[doom(description("Tagged `keep_original` variant"))]
         #[doom(keep_original)]
-        Tagged,
+        TaggedVariant,
         #[doom(description("Conditional `keep_original` variant"))]
         #[doom(keep_original(*_severity > 42))]
-        Conditional { _severity: u32 },
+        ConditionalVariant { _severity: u32 },
     }
 
     #[test]
-    fn keep_original_enum() {
-        let default_keep_original_entry = Entry::archive(KeepOriginalEnumError::Default);
-        assert!(default_keep_original_entry.original().is_none());
+    fn keep_original_enums() {
+        let default_entry = Entry::archive(KeepOriginalEnumError::DefaultVariant);
+        assert!(default_entry.original().is_none());
 
-        let tagged_keep_original_entry = Entry::archive(KeepOriginalEnumError::Tagged);
-        assert!(tagged_keep_original_entry.original().is_some());
+        let tagged_entry = Entry::archive(KeepOriginalEnumError::TaggedVariant);
+        assert!(tagged_entry.original().is_some());
 
-        let unsatisfied_conditional_keep_original_entry =
-            Entry::archive(KeepOriginalEnumError::Conditional { _severity: 12 });
+        let unsatisfied_conditional_entry =
+            Entry::archive(KeepOriginalEnumError::ConditionalVariant { _severity: 12 });
 
-        assert!(unsatisfied_conditional_keep_original_entry
-            .original()
-            .is_none());
+        assert!(unsatisfied_conditional_entry.original().is_none());
 
-        let satisfied_conditional_keep_original_entry =
-            Entry::archive(KeepOriginalEnumError::Conditional { _severity: 120 });
+        let satisfied_conditional_entry =
+            Entry::archive(KeepOriginalEnumError::ConditionalVariant { _severity: 120 });
 
-        assert!(satisfied_conditional_keep_original_entry
-            .original()
-            .is_some());
+        assert!(satisfied_conditional_entry.original().is_some());
     }
 }
