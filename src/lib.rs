@@ -521,6 +521,8 @@ mod tests {
     use super::*;
     use crate as doomstack;
 
+    // TODO: Test and fix `#[derive(Doom)]` on empty enums
+
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Unit `struct` error"))]
     #[doom(wrap(unit_struct_error))]
@@ -700,7 +702,7 @@ mod tests {
     }
 
     #[test]
-    fn keep_original() {
+    fn keep_original_struct() {
         let default_keep_original_struct_entry = Entry::archive(DefaultKeepOriginalStructError);
         assert!(default_keep_original_struct_entry.original().is_none());
 
@@ -718,6 +720,41 @@ mod tests {
             Entry::archive(ConditionalKeepOriginalStructError { _severity: 120 });
 
         assert!(satisfied_conditional_keep_original_struct_entry
+            .original()
+            .is_some());
+    }
+
+    #[derive(Doom)]
+    enum KeepOriginalEnumError {
+        #[doom(description("Default `keep_original` variant"))]
+        Default,
+        #[doom(description("Tagged `keep_original` variant"))]
+        #[doom(keep_original)]
+        Tagged,
+        #[doom(description("Conditional `keep_original` variant"))]
+        #[doom(keep_original(*_severity > 42))]
+        Conditional { _severity: u32 },
+    }
+
+    #[test]
+    fn keep_original_enum() {
+        let default_keep_original_entry = Entry::archive(KeepOriginalEnumError::Default);
+        assert!(default_keep_original_entry.original().is_none());
+
+        let tagged_keep_original_entry = Entry::archive(KeepOriginalEnumError::Tagged);
+        assert!(tagged_keep_original_entry.original().is_some());
+
+        let unsatisfied_conditional_keep_original_entry =
+            Entry::archive(KeepOriginalEnumError::Conditional { _severity: 12 });
+
+        assert!(unsatisfied_conditional_keep_original_entry
+            .original()
+            .is_none());
+
+        let satisfied_conditional_keep_original_entry =
+            Entry::archive(KeepOriginalEnumError::Conditional { _severity: 120 });
+
+        assert!(satisfied_conditional_keep_original_entry
             .original()
             .is_some());
     }
