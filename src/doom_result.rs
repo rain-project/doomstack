@@ -5,6 +5,10 @@ pub trait DoomResult<O> {
     where
         P: Doom;
 
+    fn push_as_stack<P>(self, doom: P) -> Result<O, Stack>
+    where
+        P: Doom;
+
     fn spot(self, location: Location) -> Self;
 }
 
@@ -14,6 +18,13 @@ impl<O> DoomResult<O> for Result<O, Stack> {
         P: Doom,
     {
         self.map_err(|stack| stack.push(doom))
+    }
+
+    fn push_as_stack<P>(self, doom: P) -> Result<O, Stack>
+    where
+        P: Doom,
+    {
+        self.map_err(|stack| stack.push_as_stack(doom))
     }
 
     fn spot(self, location: Location) -> Self {
@@ -30,6 +41,13 @@ where
         P: Doom,
     {
         self.map_err(|top| top.push(doom))
+    }
+
+    fn push_as_stack<P>(self, doom: P) -> Result<O, Stack>
+    where
+        P: Doom,
+    {
+        self.map_err(|top| top.push_as_stack(doom))
     }
 
     fn spot(self, location: Location) -> Self {
