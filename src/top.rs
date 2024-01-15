@@ -252,6 +252,17 @@ where
     {
         self.push(doom).spot(location)
     }
+
+    /// Syntax sugar for [`Top::push_as_stack`], then [`Stack::spot`].
+    ///
+    /// Calling `top.pot_as_stack(doom, location)` is equivalent to calling
+    /// `top.push_as_stack(doom).spot(location)`.
+    pub fn pot_as_stack<P>(self, doom: P, location: Location) -> Stack
+    where
+        P: Doom,
+    {
+        self.push_as_stack(doom).spot(location)
+    }
 }
 
 impl<D> From<Top<D>> for Stack

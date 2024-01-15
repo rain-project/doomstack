@@ -10,64 +10,38 @@ use std::{
 /// _For the difference between [`Stack`]s and [`Top`]s, please refer to [`Top`]'s
 /// documentation._
 ///
-/// # Examples
+/// # Example
 ///
 /// ```
 /// use doomstack::{Description, Doom, Stack};
 ///
-/// struct AnError;
-///
-/// struct AnotherError {
-///     severity: u32
-/// };
-///
-/// impl Doom for AnError {
-///     fn tag(&self) -> &'static str {
-///         "AnError"
-///     }
-///
-///     fn description(&self) -> Description {
-///         Description::Static("An error occurred")
-///     }
+/// #[derive(Doom)]
+/// enum SeedError {
+///     #[doom(description("Seed was pecked by a bird"))]
+///     SeedPecked,
+///     #[doom(description("Seed rotten (humidity was {humidity})"))]
+///     SeedRotten { humidity: f32 },
 /// }
 ///
-/// impl Doom for AnotherError {
-///     fn tag(&self) -> &'static str {
-///         "AnotherError"
-///     }
-///
-///     fn description(&self) -> Description {
-///         Description::Owned(format!("Another error occurred, with severity {}", self.severity))
-///     }
+/// #[derive(Doom)]
+/// enum GardeningError {
+///     #[doom(description("Failed to plant seed"))]
+///     SeedFailed,
+///     #[doom(description("Garden caught fire"))]
+///     GardenCaughtFire
 /// }
 ///
-/// let an_error = AnError;
-/// let stack = an_error.into_stack();
+/// fn seed(hungry_birds: bool, humidity: f32) -> Result<(), Stack> {
+///     if hungry_birds {
+///         return SeedError::SeedPecked.fail_as_stack();
+///     }
+///     
+///     if humidity > 50. {
+///         return SeedError::SeedRotten { humidity }.fail_as_stack();
+///     }
 ///
-/// assert_eq!(stack.entries().count(), 1);
-/// assert_eq!(stack.entries().next().unwrap().tag(), "AnError");
-///
-/// let another_error = AnotherError { severity: 3 };
-/// let top = stack.push(another_error);
-///
-/// assert_eq!(top.doom().severity, 3); // `top` stores `another_error`
-///
-/// let stack = Stack::from(top);
-///
-/// assert_eq!(stack.entries().count(), 2);
-///
-/// // `stack` no longer stores `another_error`: `severity` is no longer retrievable,
-/// // but `another_error`'s personalized description is still there:
-///
-/// assert_eq!(
-///     stack.entries().next().unwrap().description(),
-///     "Another error occurred, with severity 3"
-/// );
-///
-/// let yet_another_error = AnotherError { severity: 7 };
-/// let stack = stack.push_as_stack(yet_another_error);
-///
-/// // `stack` does not store `yet_another_error` either.
+///     Ok(())
+/// }
 /// ```
 #[derive(Default, Clone)]
 pub struct Stack {
@@ -132,7 +106,7 @@ impl Stack {
         self
     }
 
-    /// Syntax sugar for [`Stack::push`], then [`Stack::spot`].
+    /// Syntax sugar for [`Stack::push`], then [`Top::spot`].
     ///
     /// Calling `stack.push(doom).spot(location)` is equivalent to calling `stack.pot(doom, location)`.
     pub fn pot<P>(self, doom: P, location: Location) -> Top<P>
@@ -140,6 +114,17 @@ impl Stack {
         P: Doom,
     {
         self.push(doom).spot(location)
+    }
+
+    /// Syntax sugar for [`Stack::push_as_stack`], then [`Stack::spot`].
+    ///
+    /// Calling `stack.pot_as_stack(doom, location)` is equivalent to calling
+    /// `stack.push_as_stack(doom).spot(location)`.
+    pub fn pot_as_stack<P>(self, doom: P, location: Location) -> Stack
+    where
+        P: Doom,
+    {
+        self.push_as_stack(doom).spot(location)
     }
 }
 
