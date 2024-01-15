@@ -7,13 +7,15 @@ use std::{
 
 /// A stack of [`Entry`]-ies, each archiving a [`Doom`] error.
 ///
-/// _For the difference between [`Stack`]s and [`Top`]s, please refer to [`Top`]'s
-/// documentation._
+/// _(For the difference between [`Stack`]s and [`Top`]s, please refer to [`Top`]'s
+/// documentation.)_
 ///
 /// # Example
 ///
+/// #### Snippet
+///
 /// ```
-/// use doomstack::{Description, Doom, Stack};
+/// use doomstack::{Description, Doom, ResultExt, Stack};
 ///
 /// #[derive(Doom)]
 /// enum SeedError {
@@ -42,7 +44,68 @@ use std::{
 ///
 ///     Ok(())
 /// }
+///
+/// fn garden(hungry_birds: bool, humidity: f32, napalm_leak: bool) -> Result<(), Stack> {
+///     seed(hungry_birds, humidity).push_as_stack(GardeningError::SeedFailed)?;
+///
+///     if napalm_leak {
+///         return GardeningError::GardenCaughtFire.fail_as_stack();
+///     }
+///
+///     Ok(())
+/// }
 /// ```
+///
+/// #### Discussion
+///
+/// _(This example follows the general structure of the one you can find in [`Top`]'s documentation.
+/// If you are interested in a more in-depth discussion about error handling in [doomstack](crate),
+/// check out that example for additional information.)_
+///
+/// Similarly to many other examples in this documentation, here we `garden()`, and by that we mean,
+/// we `seed()` our garden, then hope a `napalm_leak` doesn't accidentally set our plants on fire.
+/// To keep track of everthing that could go wrong, we define two enums: `SeedError` for `seed()`,
+/// `GardeningError` for `garden()`. Both enums implement [`Doom`], using variants to encode the
+/// various error conditions.
+///
+/// Unlike what happens when [`Top`]s are involved, however, here the signature is the same for both
+/// `seed()` and `garden()`: `Result<(), Stack>`. To accommodate this, we [`Doom::fail_as_stack`]
+/// our [`Doom`]s (as opposed to [`Doom::fail`]-ing them), and we [`ResultExt::push_as_stack`] on
+/// our [`Result`]s (instead of [`ResultExt::push`]-ing).
+///
+/// # [`Stack`]'s pros and cons
+///
+/// As we have seen in the example above, [`Stack`]s enable uniformly-typed error handling:
+/// no matter their original type, any sequence of [`Doom`]s can be organized into a [`Stack`].
+/// This can be useful to collect heterogeneous errors in one common data structure (e.g., for
+/// logging purposes), or to keep a simple interface for traits that return errors.
+///
+/// The simplicity of [`Stack`]s, however, comes at a cost. Every time a [`Doom`] is stored in /
+/// pushed on a [`Stack`], it is archived in an [`Entry`]: the [`Doom`]'s tag and description are
+/// stored as stored as text; a copy of the original [`Doom`] is retained only if prescribed by
+/// [`Doom::keep_original`] (in that case, the [`Doom`] is stored in a [`Box<dyn Any>`], and will
+/// require dynamic dispatch to access).
+///
+/// Let's go back to our snippet above. What happens if we invoke `garden(false, 70., false)`? We
+/// get back a [`Stack`] archiving two [`Doom`]s: a `GardeningError::SeedFailed` on top, a
+/// `SeedError::SeedRotten` on the bottom. Both are stored as [`Entry`]-ies; because neither
+/// [`Doom`] overrides the default value of [`Doom::keep_original`], the original [`Doom`]s are
+/// dropped upon archival. If we print the bottom [`Entry`], we get
+/// ```text
+/// [SeedError::SeedRotten] Seed rotten (humidity was 70)
+/// ```
+/// The description is there, but concrete the `humidity` value is gone! Other than parsing the
+/// [`Entry::description`] (_please don't do that!!_) there is not much we can do to handle
+/// the `SeedError` programmatically.
+///
+/// **In summary**: if you are in a position to choose, use [`Top`]s. They provide zero-cost typed
+/// error handling for the top, most recent error. In a pinch, [`Stack`]s will provide a uniform,
+/// non-typed interface, at the cost of less-than-straightforward programmatic error handling. If
+/// all you need to do is to print out your errors for a human to read, [`Top`]s and [`Stack`]s are
+/// completely equivalent.
+///
+/// [`ResultExt::push`]: crate::ResultExt::push
+/// [`ResultExt::push_as_stack`]: crate::ResultExt::push_as_stack
 #[derive(Default, Clone)]
 pub struct Stack {
     entries: Vec<Entry>,
@@ -89,7 +152,7 @@ impl Stack {
         Top::from_parts(doom, self)
     }
 
-    /// Pushes a [`Doom`] error on top of the current [`Stack`], producing a new [`Stack`].
+    /// Pushes a [`Doom`] error on top of the current [`Stack`], producing a [`Stack`].
     ///
     /// The resulting [`Stack`] stores the new error as an [`Entry`], in its archived form.
     pub fn push_as_stack<D>(mut self, doom: D) -> Self
