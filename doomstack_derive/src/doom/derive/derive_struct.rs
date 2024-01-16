@@ -22,7 +22,6 @@ impl Derive {
                 .collect(),
 
             Fields::Unnamed(types) => (0..types.len() as u32)
-                .into_iter()
                 .map(|index| {
                     let bind = Ident::new(format!("_{index}",).as_str(), Span::call_site());
 
