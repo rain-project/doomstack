@@ -2,6 +2,7 @@
 #[rustfmt::skip]
 pub(in crate::doom) mod errors {
     pub const ENUM_WITHOUT_VARIANTS: &str = "enum has no variants";
+    pub const MALFORMED_ATTRIBUTE: &str = "malformed `doom` attribute";
     pub const EMPTY_ATTRIBUTE: &str = "empty `doom()` attribute";
     pub const UNEXPECTED_TOKEN: &str = "unexpected token in `doom()` attribute";
     pub const UNEXPECTED_KIND: &str = "unexpected `doom()` attribute";

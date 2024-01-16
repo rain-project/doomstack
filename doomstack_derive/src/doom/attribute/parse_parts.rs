@@ -7,8 +7,6 @@ use proc_macro_error::{Diagnostic, Level};
 use std::collections::VecDeque;
 use syn::{Ident, Meta};
 
-// TODO: Fix `Attribute::parse_parts` for `#[doom]` (it should produce an error, it doesn't)
-
 impl Attribute {
     /// Parses a [`syn::Attribute`] to extract an [`Attribute`]'s kind and (optional) body.
     ///
@@ -23,34 +21,52 @@ impl Attribute {
     pub(in crate::doom::attribute) fn parse_parts(
         attribute: &syn::Attribute,
     ) -> Option<(Ident, Option<Group>)> {
-        // Return `None` if `attribute` is not in the form `#[doom(...)]`
+        // `attribute` is in one of three forms: `#[scope]`, `#[scope(tokens)]` or
+        // `#[scope = value]`, where `scope` is a `::`-separated sequence of segments.
 
-        let Meta::List(meta) = &attribute.meta else {
-            // `attribute` is not in the form `#[scope(...)]`
-            return None;
+        // Extract `scope` and optional `tokens` (`tokens` is `Some` only
+        // if `attribute` is in the form `#[scope(tokens)]`, see above)
+
+        let (scope, tokens) = match &attribute.meta {
+            Meta::List(meta) => (
+                &meta.path,
+                Some(meta.tokens.clone().into_iter().collect::<VecDeque<_>>()),
+            ),
+
+            Meta::Path(scope) => (scope, None),
+            Meta::NameValue(meta) => (&meta.path, None),
         };
 
-        let scope = if meta.path.segments.len() == 1 {
-            &meta.path.segments[0]
+        // Return `None` if `scope` is not "doom" (in that case, `attribute` does
+        // not pertain to the `Doom` derive, and as such it should be ignored)
+
+        let scope = if scope.segments.len() == 1 {
+            &scope.segments[0]
         } else {
-            // `attribute` is in the form `#[scope(...)]`, but `scope`
-            // is a multi-segment path (e.g., `a::b::c`)
+            // `scope` is a multi-segment path (e.g., `a::b::c`)
             return None;
         };
 
         if scope.ident != "doom" {
-            // `attribute` is in the form `#[scope(...)]`, but `scope` is not `doom`
+            // `scope` contains a single segment, but that segment is not "doom"
             return None;
         }
 
-        // `attribute` is in the form `#[doom(...)]`: every error from this point
-        // on should result in an abort, as a failure to parse would mean that
-        // `attribute` is malformed
+        // `scope` is "doom", which means that `attribute` pertains to the `Doom` derive.
+        // Every error from this point on should result in an abort, as a failure to parse
+        // would mean that `attribute` is malformed.
 
-        let mut tokens = meta.tokens.clone().into_iter().collect::<VecDeque<_>>();
+        // Abort if `attribute` is not in the form `#[doom(tokens)]`
 
-        // Note: `attribute` is in the form `#[doom(tokens)]`, i.e., `tokens`
-        // stores the inner tokens of `attribute` (as a `VecDeque<TokenTree>`)
+        let Some(mut tokens) = tokens else {
+            Diagnostic::spanned(
+                scope.ident.span(),
+                Level::Error,
+                MALFORMED_ATTRIBUTE.to_string(),
+            )
+            .help(ATTRIBUTES_SYNTAX.to_string())
+            .abort();
+        };
 
         // Abort if `tokens` is not in the form `kind` or `kind(body)`
 
