@@ -12,6 +12,8 @@ impl Attribute {
     /// Inputs the `body` of a `#[doom(wrap(body))]` attribute. Expects `body` to
     /// be `Some(body)`, where `body` is an [`Ident`] (of a wrapping constructor).
     /// Returns a [`Wrap`].
+    ///
+    /// [`Ident`]: struct@syn::Ident
     pub(in crate::doom::attribute) fn parse_wrap(body: Option<Group>, spans: &Spans) -> Wrap {
         // `body` must be `Some`
 
