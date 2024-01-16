@@ -1,5 +1,10 @@
-use crate::doom::{derive::Variant, Attribute, Derive, Fields, Settings};
+use crate::doom::{
+    derive::Variant,
+    messages::{errors::*, helps::*},
+    Attribute, Derive, Fields, Settings,
+};
 use proc_macro2::Ident;
+use proc_macro_error::{Diagnostic, Level};
 use syn::DataEnum;
 
 impl Derive {
@@ -19,7 +24,17 @@ impl Derive {
                     fields,
                 }
             })
-            .collect();
+            .collect::<Vec<_>>();
+
+        if variants.is_empty() {
+            Diagnostic::spanned(
+                identifier.span(),
+                Level::Error,
+                ENUM_WITHOUT_VARIANTS.to_string(),
+            )
+            .help(ENUM_NEEDS_VARIANTS.to_string())
+            .abort();
+        }
 
         Derive::Enum {
             identifier,

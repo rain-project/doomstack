@@ -1,6 +1,7 @@
 // TODO: Organize messages by type / improve sorting
 #[rustfmt::skip]
 pub(in crate::doom) mod errors {
+    pub const ENUM_WITHOUT_VARIANTS: &str = "enum has no variants";
     pub const EMPTY_ATTRIBUTE: &str = "empty `doom()` attribute";
     pub const UNEXPECTED_TOKEN: &str = "unexpected token in `doom()` attribute";
     pub const UNEXPECTED_KIND: &str = "unexpected `doom()` attribute";
@@ -20,6 +21,9 @@ pub(in crate::doom) mod errors {
 
 #[rustfmt::skip]
 pub(in crate::doom) mod helps {
+    pub const ENUM_NEEDS_VARIANTS: &str = 
+          r#"`Doom` can be derived only on enums that have at least one variant"#;
+
     pub const ATTRIBUTES_SYNTAX: &str =
           r#"`doom()` attributes look like tags or function calls:
           `#[doom(attribute)]` or `#[doom(attribute(...))]`"#;

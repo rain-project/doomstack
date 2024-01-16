@@ -526,8 +526,6 @@ mod tests {
     use super::*;
     use crate as doomstack;
 
-    // TODO: Test and fix `#[derive(Doom)]` on empty enums
-
     #[derive(Debug, PartialEq, Eq, Doom)]
     #[doom(description("Unit `struct` error"))]
     #[doom(wrap(unit_struct_error))]
