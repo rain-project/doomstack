@@ -516,6 +516,10 @@ pub use top::Top;
 
 pub use doomstack_derive::Doom;
 
+pub mod prelude {
+    pub use crate::{here, Doom, ResultExt, Top};
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
