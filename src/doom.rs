@@ -92,9 +92,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///
 /// Let's start with a simple example:
 /// ```
-/// # use doomstack::{Doom, Top};
-/// #
-/// use doomstack::ResultExt;
+/// use doomstack::prelude::*;
 ///
 /// #[derive(Doom)]
 /// enum AgeError {
@@ -145,7 +143,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// `AgeError::ReadFailed`, which in turn has to be converted into a [`Top`]. Lacking
 /// any syntax sugar, that would look something like this:
 /// ```
-/// # use doomstack::{Doom, ResultExt, Top};
+/// # use doomstack::prelude::*;
 /// #
 /// # #[derive(Doom)]
 /// # enum AgeError {
@@ -200,7 +198,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// care of the rest. In the example above, all we need to do is invoke
 /// [`wrap`] on the [`Result`] produced by [`std::io::Read::read`]:
 /// ```
-/// # use doomstack::{Doom, ResultExt, Top};
+/// # use doomstack::prelude::*;
 /// #
 /// # #[derive(Doom)]
 /// # enum AgeError {

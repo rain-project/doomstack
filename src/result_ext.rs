@@ -5,7 +5,7 @@ use crate::{Doom, DoomResult, Location, Stack, Top};
 /// # Example
 ///
 /// ```
-/// use doomstack::{here, Doom, ResultExt, Stack, Top};
+/// use doomstack::{prelude::*, Stack};
 ///
 /// struct ExternalError;
 ///
@@ -59,7 +59,7 @@ use crate::{Doom, DoomResult, Location, Stack, Top};
 /// [`Result`]:
 ///
 /// ```
-/// # use doomstack::{Doom, Top};
+/// # use doomstack::prelude::*;
 /// #
 /// # #[derive(Doom)]
 /// # #[doom(description("..."))]
@@ -77,7 +77,7 @@ use crate::{Doom, DoomResult, Location, Stack, Top};
 /// a lot of boilerplate:
 ///
 /// ```
-/// # use doomstack::{Doom, Top};
+/// # use doomstack::prelude::*;
 /// #
 /// # #[derive(Doom)]
 /// # #[doom(description("..."))]

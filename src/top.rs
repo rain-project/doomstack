@@ -11,7 +11,7 @@ use std::{
 /// #### Snippet
 ///
 /// ```
-/// use doomstack::{here, Doom, Top};
+/// use doomstack::prelude::*;
 ///
 /// #[derive(Doom)]
 /// enum ToolError {

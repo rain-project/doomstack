@@ -7,7 +7,7 @@
 //! #### Snippet
 //!
 //! ```
-//! use doomstack::{here, Doom, ResultExt, Top};
+//! use doomstack::prelude::*;
 //!
 //! #[derive(Doom)]
 //! enum IrrigationError {
@@ -103,7 +103,7 @@
 //! Let's start with `water_plants()`. If the faucet is broken, we must return an `Err`.
 //! This is how we do it:
 //! ```
-//! # use doomstack::{here, Doom, ResultExt, Top};
+//! # use doomstack::prelude::*;
 //! #
 //! # #[derive(Doom)]
 //! # enum IrrigationError {
@@ -147,7 +147,7 @@
 //! Again, we get everything done in just one line:
 //!
 //! ```
-//! # use doomstack::{here, Doom, ResultExt, Top};
+//! # use doomstack::prelude::*;
 //! #
 //! # #[derive(Doom)]
 //! # enum IrrigationError {

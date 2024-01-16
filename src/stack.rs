@@ -15,7 +15,7 @@ use std::{
 /// #### Snippet
 ///
 /// ```
-/// use doomstack::{Description, Doom, ResultExt, Stack};
+/// use doomstack::{prelude::*, Stack};
 ///
 /// #[derive(Doom)]
 /// enum SeedError {
