@@ -5,7 +5,6 @@ use crate::doom::{
 use proc_macro2::Span;
 use proc_macro_error::{Diagnostic, Level};
 
-#[allow(dead_code)]
 pub(crate) struct Attribute {
     pub spans: Spans,
     pub setting: Setting,
