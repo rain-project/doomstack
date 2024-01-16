@@ -16,13 +16,9 @@ impl Attribute {
         // `body` must be `Some`
 
         let Some(body) = body else {
-            Diagnostic::spanned(
-                spans.kind,
-                Level::Error,
-                MISSING_WRAP_BODY.to_string(),
-            )
-            .help(WRAP_STYLE.to_string())
-            .abort();
+            Diagnostic::spanned(spans.kind, Level::Error, MISSING_WRAP_BODY.to_string())
+                .help(WRAP_STYLE.to_string())
+                .abort();
         };
 
         let mut tokens = body.stream().into_iter().collect::<Vec<_>>();

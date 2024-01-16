@@ -80,12 +80,9 @@ impl Attribute {
         // The first element of `attribute_tokens` must be an `Ident`
 
         let TokenTree::Ident(kind) = kind else {
-            Diagnostic::spanned(
-                kind.span(),
-                Level::Error,
-                UNEXPECTED_TOKEN.to_string()
-            ).help(ATTRIBUTES_SYNTAX.to_string())
-            .abort();
+            Diagnostic::spanned(kind.span(), Level::Error, UNEXPECTED_TOKEN.to_string())
+                .help(ATTRIBUTES_SYNTAX.to_string())
+                .abort();
         };
 
         // The second element of `attribute_tokens`, if it exists, must be a
@@ -93,12 +90,9 @@ impl Attribute {
 
         let body = body.map(|body| {
             let TokenTree::Group(body) = body else {
-                Diagnostic::spanned(
-                    body.span(),
-                    Level::Error,
-                    UNEXPECTED_TOKEN.to_string()
-                ).help(ATTRIBUTES_SYNTAX.to_string())
-                .abort();
+                Diagnostic::spanned(body.span(), Level::Error, UNEXPECTED_TOKEN.to_string())
+                    .help(ATTRIBUTES_SYNTAX.to_string())
+                    .abort();
             };
 
             if body.delimiter() != Delimiter::Parenthesis {
