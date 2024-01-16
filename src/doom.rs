@@ -690,7 +690,7 @@ pub trait Doom: 'static + Sized + Send + Sync {
 
     /// Syntax sugar for [`Doom::fail`], then [`ResultExt::spot`].
     ///
-    /// Calling `doom.fail().spot(location)` is equivalent to calling `doom.fot(location)`.
+    /// Calling `doom.fot(location)` is equivalent to calling `doom.fail().spot(location)`.
     fn fot<O>(self, location: Location) -> Result<O, Top<Self>> {
         self.fail().spot(location)
     }
@@ -730,7 +730,8 @@ pub trait Doom: 'static + Sized + Send + Sync {
 
     /// Syntax sugar for [`Doom::fail_as_stack`], then [`ResultExt::spot`].
     ///
-    /// Calling `doom.fail_as_stack().spot(location)` is equivalent to calling `doom.fot_as_stack(location)`.
+    /// Calling `doom.fot_as_stack(location)` is equivalent to calling
+    /// `doom.fail_as_stack().spot(location)` .
     fn fot_as_stack<O>(self, location: Location) -> Result<O, Stack> {
         self.fail_as_stack().spot(location)
     }

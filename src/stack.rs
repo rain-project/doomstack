@@ -171,7 +171,8 @@ impl Stack {
 
     /// Syntax sugar for [`Stack::push`], then [`Top::spot`].
     ///
-    /// Calling `stack.push(doom).spot(location)` is equivalent to calling `stack.pot(doom, location)`.
+    /// Calling `stack.pot(doom, location)` is equivalent to calling
+    /// `stack.push(doom).spot(location)`.
     pub fn pot<P>(self, doom: P, location: Location) -> Top<P>
     where
         P: Doom,
