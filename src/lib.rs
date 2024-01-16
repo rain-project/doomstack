@@ -516,6 +516,7 @@ pub use top::Top;
 
 pub use doomstack_derive::Doom;
 
+/// [Doomstack](crate)'s most common structs, traits and macros, gathered for quick importing.
 pub mod prelude {
     pub use crate::{here, Doom, ResultExt, Top};
 }
