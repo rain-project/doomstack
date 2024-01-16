@@ -11,7 +11,8 @@ use crate::{Doom, Location, Stack, Top};
 /// [`doomstack`](crate) [`Result`]s (for which it provides methods such as [`ResultExt::push`]) and
 /// foreign [`Result`]s (for which it only offers a wrapping interface).
 ///
-/// [`ResultExt`]: crate::ResultExt;
+/// [`ResultExt`]: crate::ResultExt
+/// [`ResultExt::push`]: crate::ResultExt::push
 pub trait DoomResult<O> {
     /// Maps the [`Result`]'s [`Err`] through [`Stack::push`] / [`Top::push`]].
     fn push<P>(self, doom: P) -> Result<O, Top<P>>
