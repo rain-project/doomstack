@@ -17,7 +17,7 @@ impl Attribute {
 
         let Some(body) = body else {
             Diagnostic::spanned(spans.kind, Level::Error, MISSING_WRAP_BODY.to_string())
-                .help(WRAP_STYLE.to_string())
+                .help(WRAP_SYNTAX.to_string())
                 .abort();
         };
 
@@ -31,7 +31,7 @@ impl Attribute {
                 Level::Error,
                 MISSING_WRAPPING_CONSTRUCTOR.to_string(),
             )
-            .help(WRAP_STYLE.to_string())
+            .help(WRAP_SYNTAX.to_string())
             .abort();
         }
 
@@ -41,7 +41,7 @@ impl Attribute {
                 Level::Error,
                 UNEXPECTED_WRAP_TOKEN.to_string(),
             )
-            .help(WRAP_STYLE.to_string())
+            .help(WRAP_SYNTAX.to_string())
             .abort();
         }
 
@@ -53,7 +53,7 @@ impl Attribute {
                 Level::Error,
                 UNEXPECTED_WRAP_TOKEN.to_string(),
             )
-            .help(WRAP_STYLE.to_string())
+            .help(WRAP_SYNTAX.to_string())
             .abort();
         };
 

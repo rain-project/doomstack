@@ -1,5 +1,4 @@
 // TODO: Organize messages by type / improve sorting
-// TODO: Refactor `STYLE` into `SYNTAX in const names`
 #[rustfmt::skip]
 pub(in crate::doom) mod errors {
     pub const EMPTY_ATTRIBUTE: &str = "empty `doom()` attribute";
@@ -28,11 +27,11 @@ pub(in crate::doom) mod helps {
     pub const AVAILABLE_KINDS: &str = 
           r#"available `doom()` attributes are: `description`, `wrap`, `keep_original`"#;
 
-    pub const WRAP_STYLE: &str = 
+    pub const WRAP_SYNTAX: &str = 
           r#"`wrap` attributes take the identifier of the wrapping constructor:
           `#[doom(wrap(my_error))]`"#;
 
-    pub const DESCRIPTION_STYLE: &str = 
+    pub const DESCRIPTION_SYNTAX: &str = 
           r#"`description` attributes take a format string, possibly formatting error fields:
           `#[doom(description("Error with severity {severity}"))]`
           struct MyError {

@@ -26,7 +26,7 @@ impl Attribute {
                 Level::Error,
                 MISSING_DESCRIPTION_BODY.to_string(),
             )
-            .help(DESCRIPTION_STYLE.to_string())
+            .help(DESCRIPTION_SYNTAX.to_string())
             .abort();
         };
 
@@ -40,7 +40,7 @@ impl Attribute {
                 Level::Error,
                 MISSING_DESCRIPTION_FORMAT.to_string(),
             )
-            .help(DESCRIPTION_STYLE.to_string())
+            .help(DESCRIPTION_SYNTAX.to_string())
             .abort();
         }
 
@@ -52,7 +52,7 @@ impl Attribute {
                 Level::Error,
                 UNEXPECTED_DESCRIPTION_TOKEN.to_string(),
             )
-            .help(DESCRIPTION_STYLE.to_string())
+            .help(DESCRIPTION_SYNTAX.to_string())
             .abort();
         };
 
@@ -64,7 +64,7 @@ impl Attribute {
                 Level::Error,
                 UNEXPECTED_DESCRIPTION_TOKEN.to_string(),
             )
-            .help(DESCRIPTION_STYLE.to_string())
+            .help(DESCRIPTION_SYNTAX.to_string())
             .abort();
         };
 
@@ -101,7 +101,7 @@ impl Attribute {
                     Level::Error,
                     UNEXPECTED_DESCRIPTION_ARGUMENTS.to_string(),
                 )
-                .help(DESCRIPTION_STYLE.to_string())
+                .help(DESCRIPTION_SYNTAX.to_string())
                 .abort();
             }
 
