@@ -24,9 +24,14 @@ use wrap::Wrap;
 use proc_macro::TokenStream;
 use syn::DeriveInput;
 
+/// Derives the `Doom` trait for the provided `input`.
 pub(crate) fn doom(input: TokenStream) -> TokenStream {
+    // Parse `input` into a `DeriveInput`
     let input: DeriveInput = syn::parse(input).unwrap();
+
+    // Parse `input` into a `Derive`
     let derive = Derive::parse(&input);
 
+    // Derive `derive` into a `TokenStream`
     derive.derive().into()
 }
