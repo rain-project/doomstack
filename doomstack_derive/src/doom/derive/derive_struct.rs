@@ -100,6 +100,7 @@ impl Derive {
         }
     }
 
+    /// Derives the (optional) wrapping constructor for a struct.
     pub(in crate::doom::derive) fn derive_struct_wrap(
         identifier: &Ident,
         settings: &Settings,
