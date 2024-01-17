@@ -9,6 +9,9 @@ use syn::{Data, DeriveInput};
 
 /// A representation of a struct or enum on which to derive `Doom`, complete with all [`Settings`]
 /// parsed from each item's attributes.
+///
+/// The canonical way to use [`Derive`] is to transform a [`DeriveInput`] using
+/// [`Derive::parse`] first, then [`Derive::derive`].
 pub(crate) enum Derive {
     Struct {
         identifier: Ident,
@@ -55,6 +58,8 @@ impl Derive {
         }
     }
 
+    /// Derives `Doom` trait and wrapping constructors for the struct or enum that [`Derive::parse`]
+    /// parsed to produce `self`.
     pub fn derive(&self) -> TokenStream {
         match self {
             Derive::Struct {
