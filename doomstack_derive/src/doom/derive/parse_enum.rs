@@ -8,7 +8,13 @@ use proc_macro_error::{Diagnostic, Level};
 use syn::DataEnum;
 
 impl Derive {
+    /// Parses an enum into a [`Derive`].
+    ///
+    /// Any error results in a graceful abort, indicating the problem with a meaningful message.
     pub(in crate::doom::derive) fn parse_enum(identifier: Ident, data: &DataEnum) -> Derive {
+        // Parse each element of `data.variants` into a `Variant` (the mechanism to parse each
+        // variant is similar to that implemented in `Derive::parse_struct` to parse a struct)
+
         let variants = data
             .variants
             .iter()
@@ -25,6 +31,8 @@ impl Derive {
                 }
             })
             .collect::<Vec<_>>();
+
+        // `variants` must not be empty (`Doom` cannot be derived on variant-less enums)
 
         if variants.is_empty() {
             Diagnostic::spanned(
