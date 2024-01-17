@@ -5,13 +5,14 @@ use crate::doom::{
 };
 use proc_macro2::{Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
+use std::collections::VecDeque;
 
 impl Attribute {
-    /// Parses the body of a `wrap` attribute into a [`Wrap`]
+    /// Parses the body of a `wrap` attribute into a [`Wrap`].
     ///
-    /// Inputs the `body` of a `#[doom(wrap(body))]` attribute. Expects `body` to
-    /// be `Some(body)`, where `body` is an [`Ident`] (of a wrapping constructor).
-    /// Returns a [`Wrap`].
+    /// Inputs the (optional) `body` of a `#[doom(wrap(body))]` attribute, as parsed by
+    /// [`Attribute::parse_parts`]. Expects `body` to be `Some(constructor)`, where `constructor` is
+    /// an [`Ident`] (of a wrapping constructor). Returns a [`Wrap`].
     ///
     /// [`Ident`]: struct@syn::Ident
     pub(in crate::doom::attribute) fn parse_wrap(body: Option<Group>, spans: &Spans) -> Wrap {
@@ -23,11 +24,13 @@ impl Attribute {
                 .abort();
         };
 
-        let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
+        let mut tokens = body.stream().into_iter().collect::<VecDeque<_>>();
 
         // `body` must contain exactly one `Ident`
 
-        if tokens.is_empty() {
+        let Some(constructor) = tokens.pop_front() else {
+            // `body` is empty: `constructor` cannot be parsed
+
             Diagnostic::spanned(
                 body.span(),
                 Level::Error,
@@ -35,11 +38,13 @@ impl Attribute {
             )
             .help(WRAP_SYNTAX.to_string())
             .abort();
-        }
+        };
 
-        if tokens.len() > 1 {
+        if let Some(token) = tokens.pop_front() {
+            // Unexpected `token` after `constructor`: `body` is malformed
+
             Diagnostic::spanned(
-                tokens[1].span(),
+                token.span(),
                 Level::Error,
                 UNEXPECTED_WRAP_TOKEN.to_string(),
             )
@@ -47,9 +52,9 @@ impl Attribute {
             .abort();
         }
 
-        let constructor = tokens.remove(0);
-
         let TokenTree::Ident(constructor) = constructor else {
+            // `constructor` is not an `Ident`
+
             Diagnostic::spanned(
                 constructor.span(),
                 Level::Error,
