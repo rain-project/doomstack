@@ -37,9 +37,10 @@ impl Derive {
     /// results in a graceful abort, indicating the problem with a meaningful message.
     pub fn parse(input: &DeriveInput) -> Self {
         let identifier = input.ident.clone();
+        let attributes = &input.attrs;
 
         match &input.data {
-            Data::Struct(data) => Derive::parse_struct(identifier, input, data),
+            Data::Struct(data) => Derive::parse_struct(identifier, attributes, data),
             Data::Enum(data) => Derive::parse_enum(identifier, data),
 
             Data::Union(data) => {
