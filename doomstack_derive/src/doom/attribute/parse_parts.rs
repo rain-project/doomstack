@@ -70,11 +70,12 @@ impl Attribute {
 
         // Abort if `tokens` is not in the form `kind` or `kind(body)`
 
-        // For `tokens` to be in the form `kind` or `kind(body)`, it must contain
-        // one or two elements: a `kind` `Ident` and an (optional) parenthesized
-        // block with the `body`
+        // For `tokens` to be in the form `kind` or `kind(body)`, it must
+        // contain one or two elements: a `kind` and an (optional) `body`
 
-        if tokens.is_empty() {
+        let Some(kind) = tokens.pop_front() else {
+            // `body` is empty: `kind` cannot be parsed
+
             Diagnostic::spanned(
                 attribute.bracket_token.span.close(),
                 Level::Error,
@@ -82,18 +83,19 @@ impl Attribute {
             )
             .help(ATTRIBUTES_SYNTAX.to_string())
             .abort();
-        }
+        };
 
-        if tokens.len() > 2 {
-            Diagnostic::spanned(tokens[2].span(), Level::Error, UNEXPECTED_TOKEN.to_string())
+        let body = tokens.pop_front();
+
+        if let Some(token) = tokens.pop_front() {
+            // Unexpected `token` after `body`: `attribute` is malformed
+
+            Diagnostic::spanned(token.span(), Level::Error, UNEXPECTED_TOKEN.to_string())
                 .help(ATTRIBUTES_SYNTAX.to_string())
                 .abort();
         }
 
-        let kind = tokens.pop_front().unwrap(); // `tokens` contains at least a `kind`
-        let body = tokens.pop_front(); // `tokens` might not contain any `body`
-
-        // The first element of `attribute_tokens` must be an `Ident`
+        // `kind` must be an `Ident`
 
         let TokenTree::Ident(kind) = kind else {
             Diagnostic::spanned(kind.span(), Level::Error, UNEXPECTED_TOKEN.to_string())
@@ -101,8 +103,7 @@ impl Attribute {
                 .abort();
         };
 
-        // The second element of `attribute_tokens`, if it exists, must be a
-        // parenthesized block with the body
+        // `body`, if it exists, must be a parenthesized block with the body
 
         let body = body.map(|body| {
             let TokenTree::Group(body) = body else {
