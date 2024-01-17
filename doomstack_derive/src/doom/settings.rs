@@ -5,12 +5,23 @@ use crate::doom::{
 use proc_macro2::Span;
 use proc_macro_error::{Diagnostic, Level};
 
+/// A deduplicated collection of [`Setting`]s for a group of fields (struct or enum variant).
+///
+/// [`Settings`] includes: [`Description`] (mandatory); [`KeepOriginal`] (optional); [`Wrap`]
+/// (optional).
 pub(crate) struct Settings {
     pub description: Description,
     pub keep_original: Option<KeepOriginal>,
     pub wrap: Option<Wrap>,
 }
 
+/// A helper struct to collect [`Setting`]s from an iterator, ensuring that all mandatory
+/// [`Setting`]s are provided, and no [`Setting`] is duplicated.
+///
+/// Unlike in [`Settings`], all fields in [`Collector`] are [`Option`]. All fields are initially
+/// set to [`None`], then progressively filled as the iterator unfolds. When the iterator is
+/// exhausted, mandatory fields are checked: if any is still [`None`] an error is reported and
+/// the derive aborts.
 #[derive(Default)]
 struct Collector {
     description: Option<Description>,
@@ -19,14 +30,24 @@ struct Collector {
 }
 
 impl Settings {
+    /// Collects [`Settings`] from an iterator of [`Attribute`]s.
+    ///
+    /// [`Settings::from_attributes`] loops through each element of `attributes`, collecting
+    /// each [`Setting`] in a [`Collector`], ensuring that all mandatory [`Setting`]s are provided,
+    /// and no [`Setting`] is duplicated.
+    ///
+    /// When a [`Setting`] is duplicated, the [`Attribute`]'s [`Spans`] are used to underline the
+    /// duplicated [`Setting`]. When a mandatory [`Setting`] is missing, the `item_span` (which
+    /// covers the name of the group of fields to which `attributes` apply) is underlined instead.
+    ///
+    /// [`Spans`]: crate::doom::attribute::Spans
     pub fn from_attributes<A>(attributes: A, item_span: Span) -> Self
     where
         A: IntoIterator<Item = Attribute>,
     {
-        let mut collector = Collector::default();
+        // Collect `attributes`' `Setting`s in a `Collector`. Abort if any `Setting` is duplicated.
 
-        // Collect `attributes`' `Setting`s in `Collector`,
-        // deduplicating `Description`s, `KeepOriginal`s and `Wrap`s
+        let mut collector = Collector::default();
 
         for attribute in attributes {
             match attribute.setting {
@@ -89,6 +110,8 @@ impl Settings {
                 .help(SINGLE_DESCRIPTION.to_string())
                 .abort();
         }
+
+        // Note: all mandatory `Setting`s are now guaranteed to be `Some`, and can be `unwrap()`-ed
 
         Settings {
             description: collector.description.unwrap(),
