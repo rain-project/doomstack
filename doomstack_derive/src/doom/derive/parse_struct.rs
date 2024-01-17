@@ -3,6 +3,9 @@ use proc_macro2::Ident;
 use syn::DataStruct;
 
 impl Derive {
+    /// Parses a struct into a [`Derive`].
+    ///
+    /// Any error results in a graceful abort, indicating the problem with a meaningful message.
     pub(in crate::doom::derive) fn parse_struct(
         identifier: Ident,
         attributes: &[syn::Attribute],
