@@ -7,6 +7,8 @@ use proc_macro_error::{Diagnostic, Level};
 use quote::quote;
 use syn::{Data, DeriveInput};
 
+/// A representation of a struct or enum on which to derive `Doom`, complete with all [`Settings`]
+/// parsed from each item's attributes.
 pub(crate) enum Derive {
     Struct {
         identifier: Ident,
@@ -19,6 +21,9 @@ pub(crate) enum Derive {
     },
 }
 
+/// A representation of an enum's variant on which to derive `Doom`.
+///
+/// [`Variant`]s are used in [`Derive::Enum`] to list the variants of an enum.
 pub(crate) struct Variant {
     identifier: Ident,
     settings: Settings,
@@ -26,6 +31,10 @@ pub(crate) struct Variant {
 }
 
 impl Derive {
+    /// Parses a [`DeriveInput`] into a [`Derive`].
+    ///
+    /// Expects `input` to be a struct or an enum (`Doom` cannot be derived on unions). Any error
+    /// results in a graceful abort, indicating the problem with a meaningful message.
     pub fn parse(input: &DeriveInput) -> Self {
         let identifier = input.ident.clone();
 
