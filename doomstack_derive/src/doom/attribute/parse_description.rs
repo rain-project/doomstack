@@ -5,15 +5,18 @@ use crate::doom::{
 };
 use proc_macro2::{Group, TokenTree};
 use proc_macro_error::{Diagnostic, Level};
+use std::collections::VecDeque;
 use syn::Lit;
 
 impl Attribute {
-    /// Parses the body of a `description` attribute into a [`Description`]
+    /// Parses the body of a `description` attribute into a [`Description`].
     ///
-    /// Inputs the `body` of a `#[doom(description(body))]` attribute. Expects
-    /// `body` to be `Some(body)`, with `body` feedable into [`format!`], i.e.,
-    /// a format string literal followed by zero or more arguments to format.
-    /// Returns a [`Description`].
+    /// Inputs the (optional) `body` of a `#[doom(description(body))]` attribute, as parsed by
+    /// [`Attribute::parse_parts`]. Expects `body` to be `Some(body)`, with `body` feedable into the
+    /// macro [`format!`], i.e., a format string literal followed by zero or more arguments to
+    /// format. Returns a [`Description`].
+    ///
+    /// [`Setting`]: crate::doom::Setting
     pub(in crate::doom::attribute) fn parse_description(
         body: Option<Group>,
         spans: &Spans,
@@ -30,11 +33,11 @@ impl Attribute {
             .abort();
         };
 
-        let mut tokens = body.stream().into_iter().collect::<Vec<_>>();
+        let mut tokens = body.stream().into_iter().collect::<VecDeque<_>>();
 
         // `body` must contain at least one format `LitStr`
 
-        if tokens.is_empty() {
+        let Some(format) = tokens.pop_front() else {
             Diagnostic::spanned(
                 body.span(),
                 Level::Error,
@@ -42,9 +45,7 @@ impl Attribute {
             )
             .help(DESCRIPTION_SYNTAX.to_string())
             .abort();
-        }
-
-        let format = tokens.remove(0);
+        };
 
         let TokenTree::Literal(format) = format else {
             Diagnostic::spanned(
@@ -68,36 +69,31 @@ impl Attribute {
             .abort();
         };
 
-        // Determine if `format` formats variables: if so, the
-        // `Description` is `Owned`, otherwise it is `Static`
+        // Determine if `format` formats variables: if so, the `Description` is `Owned`,
+        // otherwise it is `Static`
 
-        // `format` formats variables if and only if it contains
-        // single brackets ('{') (double brackets ("{{") are an
-        // escape sequence in `format!`, and are formatted as a
-        // literal '{'): remove all double brackets ("{{"), then
-        // check if brackets ('{') are still present
+        // `format` formats variables if and only if it contains single brackets ('{') (double
+        // brackets ("{{") are an escape sequence in `format!`, and are formatted as a literal '{'):
+        // remove all double brackets ("{{"), then check if brackets ('{') are still present
         if format.value().replace("{{", "").contains('{') {
-            // `format` formats variables: all remaining `tokens` are
-            // arguments to the `format!` macro that `Doom::description`
-            // will use to produce the item's description
+            // `format` formats variables: all remaining `tokens` are arguments to the `format!`
+            // macro that `Doom::description` will use to produce the item's description.
 
-            // Note: no further validation is necessary - `format` and
-            // `tokens` will be fed directly into the `format!` macro,
-            // possibly resulting in errors: in that case, `format!`
-            // will result in a meaningful error, referencing the
-            // correct `Span`s of `format` and `tokens`
+            // Note: no further validation is necessary - `format` and `tokens` will be fed directly
+            // into the `format!` macro, possibly resulting in errors: in that case, `format!` will
+            // produce a meaningful error, referencing the correct `Span`s of `format` and `tokens`.
 
             Description::Owned {
                 format,
-                arguments: tokens,
+                arguments: tokens.into(),
             }
         } else {
             // `format` does not format variables: there should be no `tokens`
             // remaining (this would result in orphan arguments to `format!`)
 
-            if !tokens.is_empty() {
+            if let Some(token) = tokens.pop_front() {
                 Diagnostic::spanned(
-                    tokens[0].span(),
+                    token.span(),
                     Level::Error,
                     UNEXPECTED_DESCRIPTION_ARGUMENTS.to_string(),
                 )
