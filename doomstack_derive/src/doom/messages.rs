@@ -1,4 +1,6 @@
 // TODO: Organize messages by type / improve sorting
+
+/// Error messages for the `Doom` derive.
 #[rustfmt::skip]
 pub(in crate::doom) mod errors {
     pub const ENUM_WITHOUT_VARIANTS: &str = "enum has no variants";
@@ -20,6 +22,7 @@ pub(in crate::doom) mod errors {
     pub const UNION_UNDERIVABLE: &str = "deriving `Doom` for a `union` type";
 }
 
+/// Help messages for the `Doom` derive.
 #[rustfmt::skip]
 pub(in crate::doom) mod helps {
     pub const ENUM_NEEDS_VARIANTS: &str = 
