@@ -68,11 +68,11 @@ impl Derive {
                 fields,
             } => {
                 let doom = Derive::derive_struct_doom(identifier, settings, fields);
-                let wraps = Derive::derive_struct_wraps(identifier, settings, fields);
+                let wrap = Derive::derive_struct_wrap(identifier, settings, fields);
 
                 quote! {
                     #doom
-                    #(#wraps)*
+                    #wrap
                 }
             }
 
