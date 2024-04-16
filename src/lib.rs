@@ -597,12 +597,12 @@ mod tests {
         );
 
         assert_eq!(
-            SingleItemCStructError::single_item_c_struct_error(42),
+            SingleItemCStructError::single_item_c_struct_error(42u32),
             SingleItemCStructError { _x: 42 }
         );
 
         assert_eq!(
-            MultipleItemCStructError::multiple_item_c_struct_error((42, 84)),
+            MultipleItemCStructError::multiple_item_c_struct_error((42u32, 84u32)),
             MultipleItemCStructError { _x: 42, _y: 84 }
         );
     }
@@ -660,12 +660,12 @@ mod tests {
         assert_eq!(EnumError::empty_c_variant(()), EnumError::EmptyCVariant {});
 
         assert_eq!(
-            EnumError::single_item_c_variant(42),
+            EnumError::single_item_c_variant(42u32),
             EnumError::SingleItemCVariant { _x: 42 }
         );
 
         assert_eq!(
-            EnumError::multiple_item_c_variant((42, 84)),
+            EnumError::multiple_item_c_variant((42u32, 84u32)),
             EnumError::MultipleItemCVariant { _x: 42, _y: 84 }
         );
     }

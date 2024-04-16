@@ -339,7 +339,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// );
 ///
 /// assert_eq!(
-///     MultiNamed::constructor((84, "order matters!")),
+///     MultiNamed::constructor((84u32, "order matters!")),
 ///     MultiNamed {
 ///         severity: 84,
 ///         description: "order matters!",
@@ -347,7 +347,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// );
 ///
 /// assert_eq!(
-///     EnumError::multi_named((126, "variants work just like structs!")),
+///     EnumError::multi_named((126u32, "variants work just like structs!")),
 ///     EnumError::MultiNamed {
 ///         severity: 126,
 ///         description: "variants work just like structs!",
