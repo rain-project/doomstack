@@ -582,12 +582,12 @@ mod tests {
         );
 
         assert_eq!(
-            SingleItemTupleStructError::single_item_tuple_struct_error(42),
+            SingleItemTupleStructError::single_item_tuple_struct_error(42u32),
             SingleItemTupleStructError(42)
         );
 
         assert_eq!(
-            MultipleItemTupleStructError::multiple_item_tuple_struct_error((42, 84)),
+            MultipleItemTupleStructError::multiple_item_tuple_struct_error((42u32, 84u32)),
             MultipleItemTupleStructError(42, 84)
         );
 
@@ -648,12 +648,12 @@ mod tests {
         );
 
         assert_eq!(
-            EnumError::single_item_tuple_variant(42),
+            EnumError::single_item_tuple_variant(42u32),
             EnumError::SingleItemTupleVariant(42)
         );
 
         assert_eq!(
-            EnumError::multiple_item_tuple_variant((42, 84)),
+            EnumError::multiple_item_tuple_variant((42u32, 84u32)),
             EnumError::MultipleItemTupleVariant(42, 84)
         );
 

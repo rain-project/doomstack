@@ -331,7 +331,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// assert_eq!(Unit::constructor("Anything, really"), Unit);
 ///
 /// assert_eq!(EmptyTuple::constructor(()), EmptyTuple());
-/// assert_eq!(SingleTuple::constructor(42), SingleTuple(42));
+/// assert_eq!(SingleTuple::constructor(42u32), SingleTuple(42));
 ///
 /// assert_eq!(
 ///     MultiTuple::constructor(("multiple fields are packed", "in a tuple")),

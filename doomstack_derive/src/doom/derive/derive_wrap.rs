@@ -97,11 +97,24 @@ impl Derive {
             }
 
             Fields::Unnamed(types) => {
+                // Generate the constructor's generics and trait bounds:
+                //  - One generic for each element of `types`;
+                //  - Each generic must implement `Into` for the corresponding
+                //    element of `types`.
+
+                let constructor_generics = (0..types.len())
+                    .map(|index| Ident::new(&format!("T{index}"), Span::call_site()))
+                    .collect::<Vec<_>>();
+
+                let trait_bounds = constructor_generics.iter().zip(types).map(
+                    |(constructor_generic, r#type)| quote! { #constructor_generic: Into<#r#type> },
+                );
+
                 // Derive the type of the wrapping constructor's argument
 
                 // Note that `()` is the unit type, and `(T)` is the same as `T`: no
                 // extra logic is needed to handle `types` having 0 or 1 elements.
-                let argument_type = quote!((#(#types),*));
+                let argument_type = quote!((#(#constructor_generics),*));
 
                 // Derive the item's field binds (each of the argument's members
                 // must be listed in sequence to construct the tuple-like item)
@@ -131,7 +144,10 @@ impl Derive {
 
                 quote! {
                     impl #identifier {
-                        pub fn #constructor(argument: #argument_type) -> Self {
+                        pub fn #constructor<#(#constructor_generics),*>(argument: #argument_type) -> Self
+                        where
+                            #(#trait_bounds),*
+                        {
                             #item(#(#binds),*)
                         }
                     }
