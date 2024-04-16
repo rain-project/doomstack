@@ -55,14 +55,14 @@ impl Derive {
                         // assign `argument.#index` (the`index`-th element of `argument`) to
                         // `#field_identifier`.
                         if fields.len() == 1 {
-                            quote!(#field_identifier: argument)
+                            quote!(#field_identifier: argument.into())
                         } else {
                             let index = Index {
                                 index: index as u32,
                                 span: Span::call_site(),
                             };
 
-                            quote!(#field_identifier: argument.#index)
+                            quote!(#field_identifier: argument.#index.into())
                         }
                     });
 
@@ -99,14 +99,14 @@ impl Derive {
                     // `argument`is a tuple, and we can specify `argument.#index` (the `index`-th
                     // element of `argument`) as the `index`-th element of tuple-like `item`.
                     if types.len() == 1 {
-                        quote!(argument)
+                        quote!(argument.into())
                     } else {
                         let index = Index {
                             index: index as u32,
                             span: Span::call_site(),
                         };
 
-                        quote!(argument.#index)
+                        quote!(argument.#index.into())
                     }
                 });
 
