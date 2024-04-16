@@ -137,9 +137,7 @@ impl Derive {
         variants
             .iter()
             .filter_map(|variant| {
-                let Some(wrap) = &variant.settings.wrap else {
-                    return None;
-                };
+                let wrap = variant.settings.wrap.as_ref()?;
 
                 Some(Derive::derive_wrap(
                     identifier,
