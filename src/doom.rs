@@ -185,14 +185,18 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// # }
 /// #
 /// impl AgeError {
-///     fn read_failed(source: std::io::Error) -> Self {
-///         AgeError::ReadFailed { source }
+///     fn read_failed<S>(source: S) -> Self
+///     where
+///         S: Into<std::io::Error>
+///     {
+///         AgeError::ReadFailed { source: source.into() }
 ///     }
 /// }
 /// ```
 /// Note the similarity with the lambda in our example above! All
-/// `AgeError::read_failed` does is wrap a `source` of type [`std::io::Error`]
-/// inside an `AgeError::ReadFailed`.
+/// `AgeError::read_failed` does is it takes a `source` of any type that
+/// can convert to [`std::io::Error`], converts it and wraps it inside
+/// an `AgeError::ReadFailed`.
 ///
 /// Once our wrapping constructor is derived, the [`ResultExt`] trait can take
 /// care of the rest. In the example above, all we need to do is invoke
@@ -252,13 +256,13 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// ```
 ///
 /// In both cases, [`Doom`] derives a wrapping constructor called
-/// `constructor`: `StructError::constructor`, returning a
-/// `StructError`, and `EnumError::constructor`, returning an
-/// `EnumError::Variant`. Regardless of whether `StructError` /
-/// `EnumError::Variant` are unit, named or tuple-like, `constructor`
-/// always takes exactly one argument (this is to ensure that wrapping
-/// constructors are always compatible with [`ResultExt`]'s [`wrap`]
-/// interface):
+/// `constructor`: `StructError::constructor` for `StructError`,
+/// returning a `StructError`, and `EnumError::constructor`, for
+/// `EnumError`, returning an `EnumError::Variant`. Regardless of
+/// whether `StructError` / `EnumError::Variant` are unit, named or
+/// tuple-like, `constructor` always takes exactly one argument
+/// (this is to ensure that wrapping constructors are always compatible
+/// with [`ResultExt`]'s [`wrap`] interface):
 ///
 ///  - If `StructError` / `EnumError::Variant` are units, `constructor`
 ///    accepts but ignores any argument, blindly returning `StructError` /
@@ -266,21 +270,27 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///    unit amounts to throwing away the error and returning the unit.
 ///
 ///  - If `StructError` / `EnumError::Variant` are named or tuple-like,
-///    `constructor` takes a tuple containing all `StructError`'s /
-///    `EnumError::Variant`'s fields, in the order in which they appear
-///    in the definition. Note the two special cases! If `StructError` /
-///    `EnumError::Variant` have zero fields (e.g., `struct StructError {}`,
-///    note the difference with `struct StructError;`, which is a unit)
-///    then `constructor` takes the unit type (`()`). If `StructError` /
-///    `EnumError::Variant` have exactly one field, then `constructor`
-///    takes that field as only argument (indeed, Rust treats any
-///    single-element tuple `(T)` as `T` itself).
+///    `constructor` takes a tuple of generic types, one for every field
+///    in `StructError` / `EnumError::Variant`, in the same order as
+///    they appear in the definition. Each generic type is trait-bound to
+///    implement [`Into`] for the corresponding field type. `constructor`
+///    converts each item in the argument tuple to the corresponding field
+///    in `StructError` / `EnumError::Variant`, then assembles and returns
+///    `StructError` / `EnumError::Variant`. Note the two special cases!
+///    If `StructError` / `EnumError::Variant` have zero fields (e.g.,
+///    `struct StructError {}`, note the difference with `struct StructError;`,
+///    which is a unit) then `constructor` takes the unit type (`()`). If
+///    `StructError` / `EnumError::Variant` have exactly one field, then
+///    `constructor` takes (anything that converts into) that field as only
+///    argument (indeed, Rust treats any single-element tuple `(T)` as
+///    `T` itself).
 ///
 ///  This means that all of the following are allowed (to improve
 ///  readability, all `#[doom(description(...))]`s are omitted,
 ///  just remember they are not optional!):
 /// ```
 /// # use doomstack::Doom;
+/// # use std::sync::Arc;
 /// #
 /// # #[derive(Debug, PartialEq)]
 /// #[derive(Doom)]
@@ -311,8 +321,8 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// # #[doom(description("..."))]
 /// #[doom(wrap(constructor))]
 /// struct MultiNamed {
-///     severity: u32,
-///     description: &'static str,
+///     severity: Arc<u32>,
+///     description: String,
 /// };
 ///
 /// # #[derive(Debug, PartialEq)]
@@ -341,8 +351,8 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// assert_eq!(
 ///     MultiNamed::constructor((84u32, "order matters!")),
 ///     MultiNamed {
-///         severity: 84,
-///         description: "order matters!",
+///         severity: Arc::new(84),
+///         description: "order matters!".to_string(),
 ///     }
 /// );
 ///
@@ -353,8 +363,12 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 ///         description: "variants work just like structs!",
 ///     }
 /// );
-///
 /// ```
+///
+/// Note in particular the case of `MultiNamed`: its fields are an [`Arc<u32>`] and a [`String`],
+/// but the tuple items we provide to `constructor` are a [`u32`] and a [`&str`]. Because [`u32`]
+/// implements [`Into<Arc<u32>>`] and [`&str`] implements [`Into<String>`], `constructor` can
+/// seamlessly perform the transformation, no boilerplate necessary!
 ///
 /// #### The `keep_original` attribute
 ///
@@ -537,6 +551,7 @@ use crate::{Description, Location, ResultExt, Stack, Top};
 /// ```
 ///
 /// [`doomstack`]: crate
+/// [`Arc<u32>`]: std::sync::Arc
 /// [`Entry`]: crate::Entry
 /// [`Box<dyn Any>`]: std::any::Any
 /// [`keep_original`]: Doom::keep_original
