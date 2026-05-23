@@ -1,4 +1,9 @@
 use crate::{Doom, DoomResult, Location, Stack, Top};
+use std::{
+    fmt::Debug,
+    future::{self, Future},
+    process,
+};
 
 /// An interface extending the behavior of [`Result`] with [doomstack](crate) functionality.
 ///
@@ -110,7 +115,88 @@ use crate::{Doom, DoomResult, Location, Stack, Top};
 /// [`ResultExt::wrap`] / [`ResultExt::wrap_as_stack`] map the [`Err`] through the wrapping
 /// constructor, then wrap the resulting [`Doom`] into a [`Top`] / [`Stack`]. Presto! With one
 /// simple call, your [`Result`] is [doomstack](crate) compatible.
-
+///
+/// # Unwrapping
+///
+/// [`ResultExt`] offers two classes of utilities for unwrapping values beyond what [`Result`]
+/// provides out of the box.
+///
+/// ## Unwrap or hang
+///
+/// In the asynchronous setting, you can use [`ResultExt::unwrap_or_hang`] /
+/// [`ResultExt::expect_or_hang`] to get a [`Result`]'s [`Ok`] value or hang the task indefinitely.
+/// Why would you ever want to do such a thing? For one thing, it greatly simplifies shutting down a
+/// complex system of tasks!
+///
+/// ### Example
+///
+/// ```
+/// use doomstack::prelude::*;
+/// use tokio::sync::broadcast;
+/// use tokio_util::sync::CancellationToken;
+///
+/// #[tokio::main]
+/// async fn main() {
+///     let (sender, mut receiver) = broadcast::channel(8);
+///     let cancellation = CancellationToken::new();
+///
+///     {
+///         let cancellation = cancellation.clone();
+///
+///         let task = async move {
+///             loop {
+///                 let message = receiver.recv().await.unwrap_or_hang().await;
+///                 println!("{message}");
+///             }
+///         };
+///
+///         tokio::spawn(async move {
+///             tokio::select! {
+///                 _ = task => (),
+///                 _ = cancellation.cancelled() => (),
+///             }
+///         });
+///     }
+///
+///     sender.send("Hello there!");
+///     sender.send("What a beautiful day!");
+///
+///     cancellation.cancel();
+///     drop(sender);
+/// }
+/// ```
+///
+/// ### Discussion
+///
+/// In the example above, we spawn a `tokio` task that listens on a `broadcast` channel for
+/// messages to print. The task is cancelled by a `CancellationToken`. Whenever we receive a
+/// message, we simply [`ResultExt::unwrap_or_hang`] - no complex error handling required. On the
+/// main task, we send a few messages, cancel the `CancellationToken`, then drop the `Sender`.
+/// Simply due to scheduling, however, it is entirely possible that `Receiver::recv` will return
+/// an error _before_ `CancellationToken::cancelled` returns. In this context, an  [`Err`] is just
+/// a symptom that the task is about to be cancelled. The simplest course of action is to wait
+/// around for that to happen. Without [`ResultExt::unwrap_or_hang`], we would have had to first
+/// cancel the `CancellationToken`, wait on the task's `JoinHandle`, then drop the `Sender`.
+///
+/// ## Unwrap or exit
+///
+/// Sometimes an error is unrecoverable to the point that the whole process should be shut down as a
+/// result. [`Result::unwrap`] on an [`Err`] value results in a panic, which by default unwinds only
+/// the current thread, sometimes leaving your system limping in unexpected ways that might actually
+/// be counterproductive if your goal is to effectively post-mortem what went wrong. In these cases,
+/// you might want to reach out for [`ResultExt::unwrap_or_exit`] / [`ResultExt::expect_or_exit`].
+/// When called on an [`Err`] value, they clearly report the fatality, then immediately terminate
+/// the process with an non-zero exit code.
+///
+/// ### Intended semantics
+///
+/// An alternative to [`ResultExt::unwrap_or_exit`] is, of course, setting `panic = abort` in your
+/// `Cargo.toml`, which has every panic result in process termination. [`ResultExt::unwrap_or_exit`]
+/// makes termination an explicit and selective choice. Semantically, [`Result::unwrap`] is meant to
+/// enforce at runtime an invariant that the developer expects the code to uphold. Conversely,
+/// [`ResultExt::unwrap_or_exit`] indicates an error that might happen (e.g., as a result of the
+/// program's environment - think a missing dependency, or failed access to a critical resource) but
+/// cannot be recovered from without human intervention.
 pub trait ResultExt<O, E> {
     /// Transforms the [`Result`]'s [`Err`] by conditionally forwarding `doom` to the error's
     /// [`Stack::push`] / [`Top::push`] method.
@@ -180,6 +266,33 @@ pub trait ResultExt<O, E> {
     where
         W: Fn(E) -> D,
         D: Doom;
+
+    /// Returns the [`Result`]'s [`Ok`] value or hangs indefinitely.
+    ///
+    /// Note: [`ResultExt::unwrap_or_hang`] is silent. If you need reporting on stderr, consider
+    /// using [`ResultExt::expect_or_hang`].
+    fn unwrap_or_hang(self) -> impl Future<Output = O> + Send
+    where
+        O: Send;
+
+    /// Returns the [`Result`]'s [`Ok`] value or hangs indefinitely after reporting `message` and
+    /// [`Err`] on stderr.
+    fn expect_or_hang(self, message: &str) -> impl Future<Output = O> + Send
+    where
+        O: Send,
+        E: Send + Debug;
+
+    /// Returns the [`Result`]'s [`Ok`] value or terminates the process after reporting the [`Err`]
+    /// as a fatality on stderr.
+    fn unwrap_or_exit(self) -> O
+    where
+        E: Debug;
+
+    /// Returns the [`Result`]'s [`Ok`] value or terminates the process after reporting `message`
+    /// and [`Err`] as a fatality on stderr.
+    fn expect_or_exit(self, message: &str) -> O
+    where
+        E: Debug;
 }
 
 impl<O, E> ResultExt<O, E> for Result<O, E> {
@@ -252,5 +365,67 @@ impl<O, E> ResultExt<O, E> for Result<O, E> {
         D: Doom,
     {
         ResultExt::spot(ResultExt::wrap_as_stack(self, wrap), location)
+    }
+
+    fn unwrap_or_hang(self) -> impl Future<Output = O> + Send
+    where
+        O: Send,
+    {
+        let value = self.ok();
+
+        async move {
+            match value {
+                Some(value) => value,
+                None => future::pending().await,
+            }
+        }
+    }
+
+    async fn expect_or_hang(self, message: &str) -> O
+    where
+        O: Send,
+        E: Send + Debug,
+    {
+        match self {
+            Ok(value) => value,
+
+            Err(error) => {
+                eprintln!("{message}:");
+                eprintln!("{error:?}");
+                future::pending().await
+            }
+        }
+    }
+
+    fn unwrap_or_exit(self) -> O
+    where
+        E: Debug,
+    {
+        match self {
+            Ok(value) => value,
+
+            Err(error) => {
+                eprintln!("--------- Fatal error encountered ---------");
+                eprintln!("{error:?}");
+                eprintln!("------------ (killing process) ------------");
+                process::exit(1);
+            }
+        }
+    }
+
+    fn expect_or_exit(self, message: &str) -> O
+    where
+        E: Debug,
+    {
+        match self {
+            Ok(value) => value,
+
+            Err(_) => {
+                eprintln!("--------- Fatal error encountered ---------");
+                eprintln!("{message:?}");
+                eprintln!("------------ (killing process) ------------");
+                process::exit(1);
+            }
+        }
     }
 }

@@ -5,3 +5,7 @@ edition = "2021"
 
 [dependencies]
 doomstack_derive = { path = "./doomstack_derive" }
+
+[dev-dependencies]
+tokio = { version = "1", features = [ "macros", "rt-multi-thread", "sync" ] }
+tokio-util = { version = "0.7" }
