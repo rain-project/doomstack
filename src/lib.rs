@@ -500,6 +500,7 @@ mod doom_result;
 mod entry;
 mod here;
 mod location;
+mod option_ext;
 mod result_ext;
 mod stack;
 mod top;
@@ -510,6 +511,7 @@ pub use description::Description;
 pub use doom::Doom;
 pub use entry::Entry;
 pub use location::Location;
+pub use option_ext::OptionExt;
 pub use result_ext::ResultExt;
 pub use stack::Stack;
 pub use top::Top;
@@ -518,7 +520,7 @@ pub use doomstack_derive::Doom;
 
 /// [Doomstack](crate)'s most common structs, traits and macros, gathered for quick importing.
 pub mod prelude {
-    pub use crate::{here, Doom, ResultExt, Top};
+    pub use crate::{here, Doom, OptionExt, ResultExt, Top};
 }
 
 #[cfg(test)]
